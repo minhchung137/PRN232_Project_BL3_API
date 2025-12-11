@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using PRN232_GradingSystem_API.Models.RequestModel;
@@ -7,6 +8,7 @@ using PRN232_GradingSystem_API.Models.ResponseModel;
 using PRN232_GradingSystem_Services.BusinessModel;
 using PRN232_GradingSystem_Services.Common;
 using PRN232_GradingSystem_Services.Services.Interfaces;
+using System.Security.Claims;
 
 namespace PRN232_GradingSystem_API.Controllers
 {
@@ -190,5 +192,103 @@ namespace PRN232_GradingSystem_API.Controllers
             }
         }
 
+        // LUỒNG 1: SINH VIÊN GỬI YÊU CẦU PHÚC KHẢO (Student Appeal)
+        [HttpPost("appeal")]
+        [Authorize(Roles = "Student")]
+        public async Task<ActionResult<ApiResponse<object>>> RequestAppeal([FromBody] StudentAppealRequest request)
+        {
+            try
+            {
+                var userIdString = User.FindFirst("UserId")?.Value
+                                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int studentId))
+                {
+                    return Unauthorized(ApiResponse<object>.FailResponse("Token không hợp lệ: Không tìm thấy User ID.", 401));
+                }
+
+                var isSuccess = await _service.StudentRequestAppealAsync(request.GradeId, request.Reason, studentId);
+
+                if (isSuccess)
+                {
+                    return Ok(ApiResponse<object>.SuccessResponse(null, "Gửi yêu cầu phúc khảo thành công. Vui lòng chờ Moderator xét duyệt."));
+                }
+                else
+                {
+                    return BadRequest(ApiResponse<object>.FailResponse("Không thể tạo yêu cầu phúc khảo. Vui lòng thử lại."));
+                }
+            }
+            catch (ValidationException ex) 
+            {
+                return BadRequest(ApiResponse<object>.FailResponse(ex.Message, 400));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ApiResponse<object>.FailResponse(ex.Message, 404));
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, ApiResponse<object>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500));
+            }
+        }
+
+        // LUỒNG 2: MODERATOR LẤY DANH SÁCH ĐƠN CHỜ DUYỆT (View Pending List)
+        [HttpGet("appeals")]
+        [Authorize(Roles = "Moderator, Admin")]
+        public async Task<ActionResult<ApiResponse<PagedResult<GradeBM>>>> GetPendingAppeals(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _service.GetPendingAppealsAsync(pageNumber, pageSize);
+
+                return Ok(ApiResponse<PagedResult<GradeBM>>.SuccessResponse(result, "Lấy danh sách phúc khảo thành công."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<PagedResult<GradeBM>>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500));
+            }
+        }
+
+        // LUỒNG 3: MODERATOR CHẤM LẠI & CHỐT ĐƠN (Review & Finalize)
+        [HttpPut("moderator-review")]
+        [Authorize(Roles = "Moderator, Admin")]
+        public async Task<ActionResult<ApiResponse<GradeResponse>>> ModeratorReview([FromBody] ModeratorReviewRequest request)
+        {
+            try
+            {
+                var userIdString = User.FindFirst("UserId")?.Value
+                                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int moderatorId))
+                {
+                    return Unauthorized(ApiResponse<GradeResponse>.FailResponse("Token không hợp lệ: Không tìm thấy User ID.", 401));
+                }
+
+                var updatedGradeBM = await _service.ModeratorReviewAsync(
+                    request.GradeId,
+                    request.Q1, request.Q2, request.Q3, request.Q4, request.Q5, request.Q6,
+                    request.Note,
+                    moderatorId
+                );
+
+                var response = _mapper.Map<GradeResponse>(updatedGradeBM);
+
+                return Ok(ApiResponse<GradeResponse>.SuccessResponse(response, "Phúc khảo thành công. Điểm đã được cập nhật."));
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ApiResponse<GradeResponse>.FailResponse(ex.Message, 400));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ApiResponse<GradeResponse>.FailResponse(ex.Message, 404));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<GradeResponse>.FailResponse($"Lỗi hệ thống: {ex.Message}", 500));
+            }
+        }
     }
 }

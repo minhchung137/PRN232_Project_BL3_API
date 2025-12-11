@@ -31,10 +31,10 @@ namespace PRN232_GradingSystem_API.Models.RequestModel
 
     public class LoginRequest
     {
-        [Required]
+        //[Required]
         public string UsernameOrEmail { get; set; }
 
-        [Required]
+        //[Required]
         public string Password { get; set; }
     }
 
