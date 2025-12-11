@@ -1,0 +1,68 @@
+# Visual Studio cache & temp folders
+.vs/
+*.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+packages/
+*.nuspec
+*.psmdcp
+# NuGet Symbol Packages
+*.symbols.nupkg
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# DotCover
+.idea/
+*.dotCover
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Other
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# IIS Express
+/.vs/config/applicationhost.config
+*.vspscc
+*.vssscc
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+
+# Firebase Admin SDK
+**/firebase-adminsdk.json

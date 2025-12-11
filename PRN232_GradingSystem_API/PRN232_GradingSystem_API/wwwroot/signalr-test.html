@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignalR Notification Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.connecting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        #log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .log-entry.info {
+            color: #4fc3f7;
+        }
+        .log-entry.success {
+            color: #81c784;
+        }
+        .log-entry.error {
+            color: #e57373;
+        }
+        .log-entry.notification {
+            color: #ffb74d;
+            background: #2d2d2d;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #ffb74d;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 SignalR Notification Test</h1>
+        
+        <div class="section">
+            <h2>Connection Status</h2>
+            <div id="status" class="status disconnected">Disconnected</div>
+            <button id="connectBtn" onclick="connect()">Connect</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <div class="section">
+            <h2>Join Group (Optional)</h2>
+            <div class="form-group">
+                <label>Student ID:</label>
+                <input type="text" id="studentId" placeholder="Enter student ID">
+                <button onclick="joinGroup()">Join Student Group</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Test API (Create Grade)</h2>
+            <p><strong>Note:</strong> Use Swagger or Postman to call API endpoint:</p>
+            <ul>
+                <li><code>POST /api/grade</code> - Create grade</li>
+                <li><code>POST /api/grade/with-details</code> - Create grade with details</li>
+            </ul>
+            <p>When a grade is created, you should see the notification appear below.</p>
+        </div>
+
+        <div class="section">
+            <h2>Notification Log</h2>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let connection = null;
+        const apiBaseUrl = window.location.origin; // Auto-detect API URL
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(status, className) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = status;
+            statusDiv.className = `status ${className}`;
+        }
+
+        function connect() {
+            log('Connecting to SignalR hub...', 'info');
+            updateStatus('Connecting...', 'connecting');
+            
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`${apiBaseUrl}/notificationHub`)
+                .withAutomaticReconnect()
+                .build();
+
+            // Connection events
+            connection.onclose(() => {
+                log('Connection closed', 'error');
+                updateStatus('Disconnected', 'disconnected');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+            });
+
+            connection.onreconnecting(() => {
+                log('Reconnecting...', 'info');
+                updateStatus('Reconnecting...', 'connecting');
+            });
+
+            connection.onreconnected(() => {
+                log('Reconnected successfully', 'success');
+                updateStatus('Connected', 'connected');
+            });
+
+            // Listen for GradeCreated event
+            connection.on("GradeCreated", (notification) => {
+                log('=== GRADE CREATED NOTIFICATION ===', 'notification');
+                log(JSON.stringify(notification, null, 2), 'notification');
+                log('=================================', 'notification');
+                
+                // Display formatted notification
+                displayNotification(notification);
+            });
+
+            // Start connection
+            connection.start()
+                .then(() => {
+                    log('Connected to SignalR hub successfully!', 'success');
+                    updateStatus('Connected', 'connected');
+                    document.getElementById('connectBtn').disabled = true;
+                    document.getElementById('disconnectBtn').disabled = false;
+                })
+                .catch((err) => {
+                    log(`Connection error: ${err.toString()}`, 'error');
+                    updateStatus('Connection Failed', 'disconnected');
+                    console.error(err);
+                });
+        }
+
+        function disconnect() {
+            if (connection) {
+                connection.stop()
+                    .then(() => {
+                        log('Disconnected from SignalR hub', 'info');
+                        updateStatus('Disconnected', 'disconnected');
+                        document.getElementById('connectBtn').disabled = false;
+                        document.getElementById('disconnectBtn').disabled = true;
+                    })
+                    .catch((err) => {
+                        log(`Disconnect error: ${err.toString()}`, 'error');
+                        console.error(err);
+                    });
+            }
+        }
+
+        function joinGroup() {
+            const studentId = document.getElementById('studentId').value;
+            if (!studentId) {
+                alert('Please enter a Student ID');
+                return;
+            }
+            
+            if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+                alert('Please connect first!');
+                return;
+            }
+
+            const groupName = `student_${studentId}`;
+            connection.invoke("JoinGroup", groupName)
+                .then(() => {
+                    log(`Joined group: ${groupName}`, 'success');
+                })
+                .catch((err) => {
+                    log(`Error joining group: ${err.toString()}`, 'error');
+                    console.error(err);
+                });
+        }
+
+        function displayNotification(notification) {
+            // You can customize this to display notification in a more user-friendly way
+            const details = notification.GradeDetails || [];
+            log(`Grade ID: ${notification.GradeId}`, 'success');
+            log(`Submission ID: ${notification.SubmissionId}`, 'success');
+            log(`Total Score: ${notification.TotalScore}`, 'success');
+            log(`Status: ${notification.Status}`, 'success');
+            log(`Grade Details Count: ${details.length}`, 'success');
+            
+            if (details.length > 0) {
+                log('--- Grade Details ---', 'info');
+                details.forEach((detail, index) => {
+                    log(`${index + 1}. ${detail.Qcode}.${detail.Subcode}: ${detail.Point} points${detail.Note ? ' - ' + detail.Note : ''}`, 'info');
+                });
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Auto-connect on page load (optional)
+        // window.addEventListener('load', () => {
+        //     connect();
+        // });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,6 @@
+@PRN232_GradingSystem_API_HostAddress = http://localhost:5049
+
+GET {{PRN232_GradingSystem_API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

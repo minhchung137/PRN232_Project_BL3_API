@@ -1,0 +1,90 @@
+﻿{
+   "CodeGenerationMode": 4,
+   "ContextClassName": "PRN232_GradingSystem_APIContext",
+   "ContextNamespace": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "MinimumProductVersion": "2.6.1186",
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Models",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "PRN232_GradingSystem_Repositories",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 2,
+   "SelectedToBeGenerated": 0,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "public.exam",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.grade",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.gradedetail",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.Group",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.group_student",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.semester",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.semester_subject",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.student",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.subject",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.submission",
+         "ObjectType": 0
+      },
+      {
+         "Name": "public.User",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": null,
+   "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDatabaseNamesForRoutines": true,
+   "UseDateOnlyTimeOnly": true,
+   "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false,
+   "UseT4Split": false
+}
