@@ -15,5 +15,11 @@ namespace PRN232_GradingSystem_Services.Services.Interfaces
         IQueryable<GradeBM> GetODataQueryable();
         Task<GradeBM> CreateGradeWithDetailsAsync(GradeWithDetailsRequestBM model);
         Task<GradeBM> UpdateStatusAsync(int gradeId, string? status);
+
+        Task<GradeBM> ModeratorReviewAsync(int gradeId, decimal? q1, decimal? q2, decimal? q3, decimal? q4, decimal? q5, decimal? q6, string note, int moderatorId);
+
+        Task<bool> StudentRequestAppealAsync(int gradeId, string reason, int studentId);
+
+        Task<PagedResult<GradeBM>> GetPendingAppealsAsync(int pageNumber, int pageSize);
     }
 }

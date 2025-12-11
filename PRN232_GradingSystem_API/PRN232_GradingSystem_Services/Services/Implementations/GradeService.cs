@@ -325,14 +325,14 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
         {
             // ===== VALIDATE STATUS =====
             var allowedStatuses = new HashSet<string>
-    {
-        "AutoGraded",
-        "TeacherVerified",
-        "ModeratorApproved",
-        "ModeratorRejected",
-        "AdminApproved",
-        "AdminRejected"
-    };
+            {
+               "AutoGraded",
+               "TeacherVerified",
+               "ModeratorApproved",
+                "ModeratorRejected",
+               "AdminApproved",
+               "AdminRejected"
+            };
 
             if (string.IsNullOrWhiteSpace(status) || !allowedStatuses.Contains(status))
                 throw new ValidationException(
@@ -353,5 +353,107 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             return _mapper.Map<GradeBM>(grade);
         }
 
+        // Moderator Review Method
+        public async Task<GradeBM> ModeratorReviewAsync(
+            int gradeId,
+            decimal? q1, decimal? q2, decimal? q3, decimal? q4, decimal? q5, decimal? q6,
+            string note,
+            int moderatorId)
+        {
+            var grade = await UnitOfWork.GradeRepository.GetByIdAsync(gradeId);
+            if (grade == null)
+                throw new NotFoundException($"Grade with ID {gradeId} not found.");
+
+            if (q1.HasValue) grade.Q1 = q1.Value;
+            if (q2.HasValue) grade.Q2 = q2.Value;
+            if (q3.HasValue) grade.Q3 = q3.Value;
+            if (q4.HasValue) grade.Q4 = q4.Value;
+            if (q5.HasValue) grade.Q5 = q5.Value;
+            if (q6.HasValue) grade.Q6 = q6.Value;
+
+            grade.TotalScore = (grade.Q1 ?? 0) + (grade.Q2 ?? 0) + (grade.Q3 ?? 0) +
+                               (grade.Q4 ?? 0) + (grade.Q5 ?? 0) + (grade.Q6 ?? 0);
+
+            grade.Status = "ModeratorApproved";
+            grade.GradeCount = 2;   
+            grade.MarkerId = moderatorId; 
+            grade.UpdatedAt = DateTime.UtcNow;
+
+            var moderatorNoteDetail = new GradeDetail
+            {
+                GradeId = gradeId,
+                QCode = "MOD",         
+                SubCode = "REVIEW",      
+                Point = grade.TotalScore,
+                Note = note,            
+                CreatedAt = DateTime.UtcNow
+            };
+
+            UnitOfWork.GradeRepository.Update(grade);
+            await UnitOfWork.GradedetailRepository.AddAsync(moderatorNoteDetail);
+
+            await UnitOfWork.SaveChangesAsync();
+
+            var updatedGrade = await UnitOfWork.GradeRepository.GetByIdWithDetailsAsync(gradeId);
+            return _mapper.Map<GradeBM>(updatedGrade);
+        }
+
+        // SINH VIÊN GỬI YÊU CẦU PHÚC KHẢO
+        public async Task<bool> StudentRequestAppealAsync(int gradeId, string reason, int studentId)
+        {
+            var grade = await UnitOfWork.GradeRepository.GetByIdWithDetailsAsync(gradeId);
+
+            if (grade == null)
+                throw new NotFoundException($"Grade with ID {gradeId} not found.");
+
+            if (grade.Submission == null || grade.Submission.StudentId != studentId)
+            {
+                throw new ValidationException("You are not authorized to appeal this grade.");
+            }
+
+            if (grade.GradeCount >= 2 || grade.Status == "ModeratorApproved")
+            {
+                throw new ValidationException("This grade has already been reviewed/finalized. Cannot appeal again.");
+            }
+
+            if (grade.Status != "TeacherVerified")
+            {
+                throw new ValidationException("Grade is not ready for appeal (Must be verified by Teacher first).");
+            }
+
+            if (grade.Status == "AppealRequested")
+            {
+                throw new ValidationException("You have already requested an appeal for this grade.");
+            }
+
+            grade.Status = "AppealRequested"; 
+            grade.UpdatedAt = DateTime.UtcNow;
+
+            var appealNote = new GradeDetail
+            {
+                GradeId = gradeId,
+                QCode = "STUDENT",    
+                SubCode = "APPEAL_REASON",
+                Point = 0,             
+                Note = reason,          
+                CreatedAt = DateTime.UtcNow
+            };
+
+            UnitOfWork.GradeRepository.Update(grade);
+            await UnitOfWork.GradedetailRepository.AddAsync(appealNote);
+
+            return (await UnitOfWork.SaveChangesAsync()) > 0;
+        }
+
+        //MODERATOR LẤY DANH SÁCH ĐƠN CHỜ DUYỆT
+        public async Task<PagedResult<GradeBM>> GetPendingAppealsAsync(int pageNumber, int pageSize)
+        {
+            var filter = new GradeBM
+            {
+                Status = "AppealRequested"
+            };
+
+            return await GetPagedFilteredAsync(filter, pageNumber, pageSize);
+        }
     }
 }
