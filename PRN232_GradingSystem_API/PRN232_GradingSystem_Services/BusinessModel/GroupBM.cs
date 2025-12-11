@@ -14,9 +14,9 @@ namespace PRN232_GradingSystem_Services.BusinessModel
         public int? Createby { get; set; }
         public int? Updateby { get; set; }
 
-        public User CreatebyNavigation { get; set; }
+        public AppUser CreatebyNavigation { get; set; }
         public Semester Semester { get; set; }
-        public User UpdatebyNavigation { get; set; }
+        public AppUser UpdatebyNavigation { get; set; }
 
         public IReadOnlyList<GroupStudent> GroupStudents { get; set; }
     }

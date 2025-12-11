@@ -29,8 +29,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var repositoryFilter = new Subject
             {
-                Subjectid = filter?.Subjectid ?? 0,
-                Subjectname = filter?.Subjectname
+                SubjectId = filter?.Subjectid ?? 0,
+                SubjectName = filter?.Subjectname
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);
@@ -91,7 +91,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             // Preserve creation time
             model.Subjectid = id;
-            model.Createat = existing.Createat;
+            model.Createat = existing.CreatedAt;
 
             // Map data and save
             _mapper.Map(model, existing);

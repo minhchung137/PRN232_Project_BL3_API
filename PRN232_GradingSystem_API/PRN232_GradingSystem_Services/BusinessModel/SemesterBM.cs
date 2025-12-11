@@ -16,10 +16,10 @@ namespace PRN232_GradingSystem_Services.BusinessModel
         public int? Createby { get; set; }
         public int? Updateby { get; set; }
 
-        public virtual User CreateByNavigation { get; set; }
-        public virtual User UpdateByNavigation { get; set; }
+        public virtual AppUser CreateByNavigation { get; set; }
+        public virtual AppUser UpdateByNavigation { get; set; }
         public IReadOnlyList<Exam> Exams { get; set; }
-        public IReadOnlyList<Group> Groups { get; set; }
+        public IReadOnlyList<ClassGroup> Groups { get; set; }
         public IReadOnlyList<SemesterSubject> SemesterSubjects { get; set; }
     }
 }

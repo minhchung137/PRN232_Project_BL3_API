@@ -303,7 +303,7 @@ public class BackblazeStorageService : IFileStorageService
         // Find student by Studentroll (student code) - case insensitive
         var studentCodeLower = studentCode?.ToLowerInvariant() ?? string.Empty;
         var student = _unitOfWork.StudentRepository.GetAllWithDetails()
-            .FirstOrDefault(s => s.Studentroll != null && s.Studentroll.ToLower() == studentCodeLower);
+            .FirstOrDefault(s => s.StudentRoll != null && s.StudentRoll.ToLower() == studentCodeLower);
         
         if (student == null)
         {
@@ -311,7 +311,7 @@ public class BackblazeStorageService : IFileStorageService
         }
 
         // Use solution (full folder name like "anhdlse181818") for Solution field
-        var submission = await _submissionService.FindOrCreateSubmissionAsync(examId, student.Studentid, fileUrl, solution);
+        var submission = await _submissionService.FindOrCreateSubmissionAsync(examId, student.StudentId, fileUrl, solution);
         return submission;
     }
 

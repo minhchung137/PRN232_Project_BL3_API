@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 {
-    public class UserRepository : EntityRepository<User>, IUserRepository
+    public class UserRepository : EntityRepository<AppUser>, IUserRepository
     {
         private readonly PRN232_GradingSystem_APIContext _dbContext;
 
@@ -19,30 +19,30 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
             _dbContext = dbContext;
         }
 
-        public override Task<User> GetByIdWithDetailsAsync(int id)
+        public override Task<AppUser> GetByIdWithDetailsAsync(int id)
         {
-            return _dbContext.Users
+            return _dbContext.AppUsers
                 .Include(u => u.Grades)
-                .Include(u => u.GroupCreatebyNavigations)
-                .Include(u => u.GroupUpdatebyNavigations)
+                .Include(u => u.ClassGroupCreatedByNavigations)
+                .Include(u => u.ClassGroupUpdatedByNavigations)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Userid == id);
+                .FirstOrDefaultAsync(u => u.UserId == id);
         }
 
-        public async Task<(IReadOnlyList<User> Items, int Total)> GetPagedWithDetailsAsync(
-            User filter, int pageNumber, int pageSize)
+        public async Task<(IReadOnlyList<AppUser> Items, int Total)> GetPagedWithDetailsAsync(
+            AppUser filter, int pageNumber, int pageSize)
         {
-            var query = _dbContext.Users
+            var query = _dbContext.AppUsers
                 .Include(u => u.Grades)
-                .Include(u => u.GroupCreatebyNavigations)
-                .Include(u => u.GroupUpdatebyNavigations)
+                .Include(u => u.ClassGroupCreatedByNavigations)
+                .Include(u => u.ClassGroupUpdatedByNavigations)
                 .AsNoTracking()
                 .AsQueryable();
 
             if (filter != null)
             {
-                if (filter.Userid > 0)
-                    query = query.Where(u => u.Userid == filter.Userid);
+                if (filter.UserId > 0)
+                    query = query.Where(u => u.UserId == filter.UserId);
 
                 if (!string.IsNullOrWhiteSpace(filter.Email))
                     query = query.Where(u => u.Email.Contains(filter.Email));
@@ -53,14 +53,14 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                 if (!string.IsNullOrWhiteSpace(filter.Role))
                     query = query.Where(u => u.Role == filter.Role);
 
-                if (filter.Isactive.HasValue)
-                    query = query.Where(u => u.Isactive == filter.Isactive);
+                if (filter.IsActive.HasValue)
+                    query = query.Where(u => u.IsActive == filter.IsActive);
             }
 
             var total = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(u => u.Createat)
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -68,38 +68,38 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
             return (items, total);
         }
 
-        public async Task<User> GetByUsernameAsync(string username)
+        public async Task<AppUser> GetByUsernameAsync(string username)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _dbContext.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        public async Task<User> GetByEmailAsync(string email)
+        public async Task<AppUser> GetByEmailAsync(string email)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _dbContext.AppUsers.FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<User> GetByRefreshTokenAsync(string refreshToken)
+        public async Task<AppUser> GetByRefreshTokenAsync(string refreshToken)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Refreshtoken == refreshToken);
+            return await _dbContext.AppUsers.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
 
-        public IQueryable<User> GetAllWithDetails()
+        public IQueryable<AppUser> GetAllWithDetails()
         {
-            return _dbContext.Users
+            return _dbContext.AppUsers
                  .Include(u => u.Grades)
-                 .Include(u => u.GroupCreatebyNavigations)
-                 .Include(u => u.GroupUpdatebyNavigations)
+                 .Include(u => u.ClassGroupCreatedByNavigations)
+                 .Include(u => u.ClassGroupUpdatedByNavigations)
                  .AsQueryable();
         }
         public async Task<bool> ExistsAsync(int userId)
         {
-            return await _dbContext.Users.AnyAsync(u => u.Userid == userId);
+            return await _dbContext.AppUsers.AnyAsync(u => u.UserId == userId);
         }
         public async Task<int?> GetUserIdByEmailAsync(string email)
         {
-            return await _dbContext.Users
+            return await _dbContext.AppUsers
                 .Where(u => u.Email == email)
-                .Select(u => (int?)u.Userid)
+                .Select(u => (int?)u.UserId)
                 .FirstOrDefaultAsync();
         }
     }

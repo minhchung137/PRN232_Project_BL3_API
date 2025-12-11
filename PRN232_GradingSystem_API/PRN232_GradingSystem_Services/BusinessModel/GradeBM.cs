@@ -25,7 +25,7 @@ namespace PRN232_GradingSystem_Services.BusinessModel
         public int? Marker { get; set; }
 
         public Submission Submission { get; set; }
-        public User MarkerNavigation { get; set; }
-        public IReadOnlyList<Gradedetail> Gradedetails { get; set; }
+        public AppUser MarkerNavigation { get; set; }
+        public IReadOnlyList<GradeDetail> Gradedetails { get; set; }
     }
 }

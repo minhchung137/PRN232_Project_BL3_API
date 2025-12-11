@@ -7,7 +7,7 @@ using PRN232_GradingSystem_Services.Services.Interfaces;
 
 namespace PRN232_GradingSystem_Services.Services.Implementations
 {
-    public class GroupService : CrudService<Group, GroupBM>, IGroupService
+    public class GroupService : CrudService<ClassGroup, GroupBM>, IGroupService
     {
         private readonly IMapper _mapper;
 
@@ -17,20 +17,20 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             _mapper = mapper;
         }
 
-        protected override PRN232_GradingSystem_Repositories.Repositories.Interfaces.IEntityRepository<Group>
+        protected override PRN232_GradingSystem_Repositories.Repositories.Interfaces.IEntityRepository<ClassGroup>
             GetRepository() => UnitOfWork.GroupRepository;
 
         public async Task<PagedResult<GroupBM>> GetPagedFilteredAsync(GroupBM filter, int pageNumber, int pageSize)
         {
             var repo = UnitOfWork.GroupRepository;
 
-            var repositoryFilter = new Group
+            var repositoryFilter = new ClassGroup
             {
-                Groupid = filter?.Groupid ?? 0,
-                Groupname = filter?.Groupname,
-                Semesterid = filter?.Semesterid,
-                Createby = filter?.Createby,
-                Updateby = filter?.Updateby
+                GroupId = filter?.Groupid ?? 0,
+                GroupName = filter?.Groupname,
+                SemesterId = filter?.Semesterid,
+                CreatedBy = filter?.Createby,
+                UpdatedBy = filter?.Updateby
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);
@@ -75,8 +75,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 throw new ConflictException($"Group name '{model.Groupname}' already exists in this semester.");
 
             // ===== MAP & SAVE =====
-            var entity = _mapper.Map<Group>(model);
-            entity.Createat = DateTime.UtcNow;
+            var entity = _mapper.Map<ClassGroup>(model);
+            entity.CreatedAt = DateTime.UtcNow;
             await repo.AddAsync(entity);
             await UnitOfWork.SaveChangesAsync();
 
@@ -118,10 +118,10 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
            
 
             // ===== CẬP NHẬT GIÁ TRỊ =====
-            existing.Groupname = model.Groupname ?? existing.Groupname;
-            existing.Semesterid = model.Semesterid ?? existing.Semesterid;
-            existing.Updateby = model.Updateby ?? existing.Updateby;
-            existing.Updateat = DateTime.UtcNow;
+            existing.GroupName = model.Groupname ?? existing.GroupName;
+            existing.SemesterId = model.Semesterid ?? existing.SemesterId;
+            existing.UpdatedBy = model.Updateby ?? existing.UpdatedBy;
+            existing.UpdatedAt= DateTime.UtcNow;
 
             repo.Update(existing);
             await UnitOfWork.SaveChangesAsync();

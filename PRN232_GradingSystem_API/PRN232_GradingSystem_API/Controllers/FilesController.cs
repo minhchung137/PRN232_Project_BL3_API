@@ -81,10 +81,10 @@ public class FilesController : ControllerBase
             HttpContext.Response.RegisterForDispose(download);
 
             var suggestedName = download.FileName;
-            if (!string.IsNullOrWhiteSpace(submission.Student?.Studentroll))
+            if (!string.IsNullOrWhiteSpace(submission.Student?.StudentRoll))
             {
                 var ext = Path.GetExtension(download.FileName);
-                suggestedName = $"{submission.Student.Studentroll}_submission{ext}";
+                suggestedName = $"{submission.Student.StudentRoll}_submission{ext}";
             }
 
             return File(download.Stream, download.ContentType, suggestedName);

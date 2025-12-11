@@ -26,7 +26,7 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                 .Include(s => s.SemesterSubjects)
                     .ThenInclude(ss => ss.Semester)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Subjectid == id);
+                .FirstOrDefaultAsync(s => s.SubjectId == id);
         }
 
         public async Task<(IReadOnlyList<Subject> Items, int Total)> GetPagedWithDetailsAsync(
@@ -40,17 +40,17 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 
             if (filter != null)
             {
-                if (filter.Subjectid > 0)
-                    query = query.Where(s => s.Subjectid == filter.Subjectid);
+                if (filter.SubjectId > 0)
+                    query = query.Where(s => s.SubjectId == filter.SubjectId);
 
-                if (!string.IsNullOrWhiteSpace(filter.Subjectname))
-                    query = query.Where(s => s.Subjectname.Contains(filter.Subjectname));
+                if (!string.IsNullOrWhiteSpace(filter.SubjectName))
+                    query = query.Where(s => s.SubjectName.Contains(filter.SubjectName));
             }
 
             var total = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(s => s.Createat)
+                .OrderByDescending(s => s.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -69,11 +69,11 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         public async Task<bool> ExistsByNameAsync(string name, int excludeId = 0)
         {
             return await _dbContext.Subjects
-                .AnyAsync(s => s.Subjectid != excludeId && s.Subjectname == name);
+                .AnyAsync(s => s.SubjectId != excludeId && s.SubjectName == name);
         }
         public async Task<bool> ExistsAsync(int subjectId)
         {
-            return await _dbContext.Subjects.AnyAsync(s => s.Subjectid == subjectId);
+            return await _dbContext.Subjects.AnyAsync(s => s.SubjectId == subjectId);
         }
     }
 }

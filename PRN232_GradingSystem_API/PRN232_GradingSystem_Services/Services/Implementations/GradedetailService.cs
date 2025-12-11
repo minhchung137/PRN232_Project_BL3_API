@@ -7,7 +7,7 @@ using PRN232_GradingSystem_Services.Services.Interfaces;
 
 namespace PRN232_GradingSystem_Services.Services.Implementations
 {
-    public class GradedetailService : CrudService<Gradedetail, GradedetailBM>, IGradedetailService
+    public class GradedetailService : CrudService<GradeDetail, GradedetailBM>, IGradedetailService
     {
         private readonly IMapper _mapper;
 
@@ -17,19 +17,19 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             _mapper = mapper;
         }
 
-        protected override PRN232_GradingSystem_Repositories.Repositories.Interfaces.IEntityRepository<Gradedetail>
+        protected override PRN232_GradingSystem_Repositories.Repositories.Interfaces.IEntityRepository<GradeDetail>
             GetRepository() => UnitOfWork.GradedetailRepository;
 
         public async Task<PagedResult<GradedetailBM>> GetPagedFilteredAsync(GradedetailBM filter, int pageNumber, int pageSize)
         {
             var repo = UnitOfWork.GradedetailRepository;
 
-            var repositoryFilter = new Gradedetail
+            var repositoryFilter = new GradeDetail
             {
-                Gradedetailid = filter?.Gradedetailid ?? 0,
-                Gradeid = filter?.Gradeid,
-                Qcode = filter?.Qcode,
-                Subcode = filter?.Subcode
+                GradeDetailId = filter?.Gradedetailid ?? 0,
+                GradeId = filter?.Gradeid,
+                QCode = filter?.Qcode,
+                SubCode = filter?.Subcode
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);
@@ -71,7 +71,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             ValidateSubcodeAndPoint(model.Qcode, model.Subcode, model.Point);
 
             // ===== CHECK TRÙNG VỚI GRADEID =====
-            var existingDetails = await gradedetailRepo.GetAllAsync(d => d.Gradeid == model.Gradeid.Value);
+            var existingDetails = await gradedetailRepo.GetAllAsync(d => d.GradeId == model.Gradeid.Value);
 
             // 1. Kiểm tra số lượng tối đa (tổng subcode)
             int totalSubcodes = MaxScoresData.MaxScores.Sum(q => q.SubScores.Count);
@@ -79,14 +79,14 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 throw new ValidationException($"Gradeid '{model.Gradeid}' already has maximum number of gradedetails ({totalSubcodes}).");
 
             // 2. Kiểm tra trùng Qcode + Subcode
-            bool isDuplicate = existingDetails.Any(d => d.Qcode == model.Qcode && d.Subcode == model.Subcode);
+            bool isDuplicate = existingDetails.Any(d => d.QCode == model.Qcode && d.SubCode == model.Subcode);
             if (isDuplicate)
                 throw new ValidationException($"Gradedetail with Qcode '{model.Qcode}' and Subcode '{model.Subcode}' already exists for Gradeid '{model.Gradeid}'.");
 
             // ===== MAP & SAVE =====
-            var entity = _mapper.Map<Gradedetail>(model);
-            entity.Createat = DateTime.UtcNow;
-            entity.Updateat = null;
+            var entity = _mapper.Map<GradeDetail>(model);
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = null;
 
             await gradedetailRepo.AddAsync(entity);
             await UnitOfWork.SaveChangesAsync();
@@ -104,7 +104,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 throw new NotFoundException($"Gradedetail with ID '{id}' does not exist.");
 
             // ===== VALIDATE POINT =====
-            ValidateSubcodeAndPoint(existing.Qcode, existing.Subcode, model.Point);
+            ValidateSubcodeAndPoint(existing.QCode, existing.SubCode, model.Point);
 
             // ===== UPDATE GRADEDETAIL =====
             if (model.Point.HasValue)
@@ -113,27 +113,27 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             if (!string.IsNullOrWhiteSpace(model.Note))
                 existing.Note = model.Note;
 
-            existing.Updateat = DateTime.UtcNow;
+            existing.UpdatedAt = DateTime.UtcNow;
 
             gradedetailRepo.Update(existing);
 
             // ===== RELOAD ALL DETAILS OF THIS GRADE =====
-            var allDetails = await gradedetailRepo.GetByGradeIdAsync(existing.Gradeid.Value);
+            var allDetails = await gradedetailRepo.GetByGradeIdAsync(existing.GradeId.Value);
 
             // ===== RECALCULATE GRADE =====
-            var grade = await gradeRepo.GetByIdAsync(existing.Gradeid.Value, trackChanges: true);
+            var grade = await gradeRepo.GetByIdAsync(existing.GradeId.Value, trackChanges: true);
             if (grade == null)
-                throw new NotFoundException($"Grade with ID '{existing.Gradeid}' not found.");
+                throw new NotFoundException($"Grade with ID '{existing.GradeId}' not found.");
 
-            grade.Q1 = allDetails.Where(x => x.Qcode == "Q1").Sum(x => x.Point ?? 0);
-            grade.Q2 = allDetails.Where(x => x.Qcode == "Q2").Sum(x => x.Point ?? 0);
-            grade.Q3 = allDetails.Where(x => x.Qcode == "Q3").Sum(x => x.Point ?? 0);
-            grade.Q4 = allDetails.Where(x => x.Qcode == "Q4").Sum(x => x.Point ?? 0);
-            grade.Q5 = allDetails.Where(x => x.Qcode == "Q5").Sum(x => x.Point ?? 0);
-            grade.Q6 = allDetails.Where(x => x.Qcode == "Q6").Sum(x => x.Point ?? 0);
+            grade.Q1 = allDetails.Where(x => x.QCode == "Q1").Sum(x => x.Point ?? 0);
+            grade.Q2 = allDetails.Where(x => x.QCode == "Q2").Sum(x => x.Point ?? 0);
+            grade.Q3 = allDetails.Where(x => x.QCode == "Q3").Sum(x => x.Point ?? 0);
+            grade.Q4 = allDetails.Where(x => x.QCode == "Q4").Sum(x => x.Point ?? 0);
+            grade.Q5 = allDetails.Where(x => x.QCode == "Q5").Sum(x => x.Point ?? 0);
+            grade.Q6 = allDetails.Where(x => x.QCode == "Q6").Sum(x => x.Point ?? 0);
 
-            grade.Totalscore = allDetails.Sum(x => x.Point ?? 0);
-            grade.Updateat = DateTime.UtcNow;
+            grade.TotalScore = allDetails.Sum(x => x.Point ?? 0);
+            grade.UpdatedAt = DateTime.UtcNow;
 
             gradeRepo.Update(grade);
 
@@ -177,7 +177,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                     throw new NotFoundException($"Gradedetail with ID '{item.Gradedetailid}' not found.");
 
                 // Validate point
-                ValidateSubcodeAndPoint(existing.Qcode, existing.Subcode, item.Point);
+                ValidateSubcodeAndPoint(existing.QCode, existing.SubCode, item.Point);
 
                 if (item.Point.HasValue)
                     existing.Point = item.Point;
@@ -185,13 +185,13 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 if (!string.IsNullOrWhiteSpace(item.Note))
                     existing.Note = item.Note;
 
-                existing.Updateat = DateTime.UtcNow;
+                existing.UpdatedAt = DateTime.UtcNow;
                 gradedetailRepo.Update(existing);
 
-                if (!existing.Gradeid.HasValue)
-                    throw new ValidationException($"Gradedetail {existing.Gradedetailid} has no GradeId assigned.");
+                if (!existing.GradeId.HasValue)
+                    throw new ValidationException($"Gradedetail {existing.GradeDetailId} has no GradeId assigned.");
 
-                gradeIds.Add(existing.Gradeid.Value);
+                gradeIds.Add(existing.GradeId.Value);
             }
 
             var distinctGradeIds = gradeIds.Distinct();
@@ -204,15 +204,15 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 if (grade == null)
                     throw new NotFoundException($"Grade with ID '{gid}' not found.");
 
-                grade.Q1 = allDetails.Where(x => x.Qcode == "Q1").Sum(x => x.Point ?? 0);
-                grade.Q2 = allDetails.Where(x => x.Qcode == "Q2").Sum(x => x.Point ?? 0);
-                grade.Q3 = allDetails.Where(x => x.Qcode == "Q3").Sum(x => x.Point ?? 0);
-                grade.Q4 = allDetails.Where(x => x.Qcode == "Q4").Sum(x => x.Point ?? 0);
-                grade.Q5 = allDetails.Where(x => x.Qcode == "Q5").Sum(x => x.Point ?? 0);
-                grade.Q6 = allDetails.Where(x => x.Qcode == "Q6").Sum(x => x.Point ?? 0);
-                grade.Totalscore = allDetails.Sum(x => x.Point ?? 0);
+                grade.Q1 = allDetails.Where(x => x.QCode == "Q1").Sum(x => x.Point ?? 0);
+                grade.Q2 = allDetails.Where(x => x.QCode == "Q2").Sum(x => x.Point ?? 0);
+                grade.Q3 = allDetails.Where(x => x.QCode == "Q3").Sum(x => x.Point ?? 0);
+                grade.Q4 = allDetails.Where(x => x.QCode == "Q4").Sum(x => x.Point ?? 0);
+                grade.Q5 = allDetails.Where(x => x.QCode == "Q5").Sum(x => x.Point ?? 0);
+                grade.Q6 = allDetails.Where(x => x.QCode == "Q6").Sum(x => x.Point ?? 0);
+                grade.TotalScore = allDetails.Sum(x => x.Point ?? 0);
 
-                grade.Updateat = DateTime.UtcNow;
+                grade.UpdatedAt = DateTime.UtcNow;
                 gradeRepo.Update(grade);
             }
 

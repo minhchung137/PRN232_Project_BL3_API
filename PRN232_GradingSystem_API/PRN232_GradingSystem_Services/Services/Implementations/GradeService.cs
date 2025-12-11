@@ -33,19 +33,19 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var repositoryFilter = new Grade
             {
-                Gradeid = filter?.Gradeid ?? 0,        
-                Submissionid = filter?.Submissionid,
-                Marker = filter?.Marker,
+                GradeId = filter?.Gradeid ?? 0,        
+                SubmissionId = filter?.Submissionid,
+                Marker = filter?.MarkerNavigation,
                 Q1 = filter?.Q1,
                 Q2 = filter?.Q2,
                 Q3 = filter?.Q3,
                 Q4 = filter?.Q4,
                 Q5 = filter?.Q5,
                 Q6 = filter?.Q6,
-                Totalscore = filter?.Totalscore,
+                TotalScore = filter?.Totalscore,
                 Status = filter?.Status,
-                Createat = filter?.Createat,
-                Updateat = filter?.Updateat
+                CreatedAt = filter?.Createat,
+                UpdatedAt = filter?.Updateat
             };
 
 
@@ -126,8 +126,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             model.Totalscore = scoreMap.Values.Where(v => v.HasValue).Sum(v => v.Value);
 
             var entity = _mapper.Map<Grade>(model);
-            entity.Createat = DateTime.UtcNow;
-            entity.Updateat = null;
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = null;
             entity.Status = "TeacherVerified";
             await gradeRepo.AddAsync(entity);
             await UnitOfWork.SaveChangesAsync();
@@ -199,8 +199,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             existing.Q4 = scoreMap["Q4"];
             existing.Q5 = scoreMap["Q5"];
             existing.Q6 = scoreMap["Q6"];
-            existing.Totalscore = scoreMap.Values.Where(v => v.HasValue).Sum(v => v.Value);
-            existing.Updateat = DateTime.UtcNow;
+            existing.TotalScore = scoreMap.Values.Where(v => v.HasValue).Sum(v => v.Value);
+            existing.UpdatedAt = DateTime.UtcNow;
 
             gradeRepo.Update(existing);
             await UnitOfWork.SaveChangesAsync();
@@ -227,7 +227,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 if (submission != null)
                 {
                     submission.Comment = model.Comment;
-                    submission.Updateat = DateTime.UtcNow;
+                    submission.UpdatedAt = DateTime.UtcNow;
 
                     UnitOfWork.SubmissionRepository.Update(submission);
                 }
@@ -274,8 +274,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             };
 
             var gradeEntity = _mapper.Map<Grade>(grade);
-            gradeEntity.Createat = DateTime.UtcNow;
-            gradeEntity.Updateat = null;
+            gradeEntity.CreatedAt = DateTime.UtcNow;
+            gradeEntity.UpdatedAt = null;
             gradeEntity.Status = "AutoGraded";
             await UnitOfWork.GradeRepository.AddAsync(gradeEntity);
             await UnitOfWork.SaveChangesAsync();
@@ -285,11 +285,11 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             {
                 // Map trực tiếp từ GradedetailCreateRequest → GradedetailBM → Gradedetail
                 var gdBM = _mapper.Map<GradedetailBM>(gdRequest);
-                gdBM.Gradeid = gradeEntity.Gradeid; // set Gradeid sau khi grade đã được lưu
+                gdBM.Gradeid = gradeEntity.GradeId; // set Gradeid sau khi grade đã được lưu
 
-                var entity = _mapper.Map<Gradedetail>(gdBM);
-                entity.Createat = DateTime.UtcNow;
-                entity.Updateat = null;
+                var entity = _mapper.Map<GradeDetail>(gdBM);
+                entity.CreatedAt = DateTime.UtcNow;
+                entity.UpdatedAt = null;
 
                 await UnitOfWork.GradedetailRepository.AddAsync(entity);
             }
@@ -345,7 +345,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             // ===== UPDATE STATUS =====
             grade.Status = status;
-            grade.Updateat = DateTime.UtcNow;
+            grade.UpdatedAt = DateTime.UtcNow;
 
             UnitOfWork.GradeRepository.Update(grade);
             await UnitOfWork.SaveChangesAsync();

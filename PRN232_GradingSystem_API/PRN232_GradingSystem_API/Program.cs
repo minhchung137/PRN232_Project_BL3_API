@@ -18,12 +18,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 ExcelPackage.License.SetNonCommercialPersonal("GROUP4");
 
-// Cấu hình để chạy trên Docker/Render
+// Cấu hình để chạy trên Docker/Render(Note: khi nao chay docker thi mo len)
+//builder.WebHost.ConfigureKestrel(serverOptions =>
+//{
+//    serverOptions.ListenAnyIP(8080); // Render yêu cầu chạy ở port 8080
+//    serverOptions.Limits.MaxRequestBodySize = 2L * 1024 * 1024 * 1024; // 2 GB
+//});
+
+//config chay local
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(8080); // Render yêu cầu chạy ở port 8080
+    // serverOptions.ListenAnyIP(8080); // Comment dòng này lại khi chạy Local
     serverOptions.Limits.MaxRequestBodySize = 2L * 1024 * 1024 * 1024; // 2 GB
 });
+
+
 // Add services to the container.
 
 builder.Services.AddControllers()

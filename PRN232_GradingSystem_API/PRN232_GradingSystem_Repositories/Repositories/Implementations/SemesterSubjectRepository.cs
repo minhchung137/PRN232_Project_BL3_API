@@ -25,7 +25,7 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                 .Include(x => x.Semester)
                 .Include(x => x.Subject)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Semesterid == semesterId && x.Subjectid == subjectId);
+                .FirstOrDefaultAsync(x => x.SemesterId == semesterId && x.SubjectId == subjectId);
         }
             
         public async Task<(IReadOnlyList<SemesterSubject> Items, int Total)> GetPagedWithDetailsAsync(
@@ -39,16 +39,16 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 
             if (filter != null)
             {
-                if (filter.Semesterid > 0)
-                    query = query.Where(x => x.Semesterid == filter.Semesterid);
+                if (filter.SemesterId > 0)
+                    query = query.Where(x => x.SemesterId == filter.SemesterId);
 
-                if (filter.Subjectid > 0)
-                    query = query.Where(x => x.Subjectid == filter.Subjectid);
+                if (filter.SubjectId > 0)
+                    query = query.Where(x => x.SubjectId == filter.SubjectId);
             }
 
             var total = await query.CountAsync();
             var items = await query
-                .OrderByDescending(x => x.Createat)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -66,12 +66,12 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         public async Task<bool> ExistsAsync(int semesterId, int subjectId)
         {
             return await _dbContext.SemesterSubjects
-                .AnyAsync(ss => ss.Semesterid == semesterId && ss.Subjectid == subjectId);
+                .AnyAsync(ss => ss.SemesterId == semesterId && ss.SubjectId == subjectId);
         }
         public Task<SemesterSubject> GetByKeysAsync(int semesterId, int subjectId, bool trackChanges = false)
         {
             return _dbContext.SemesterSubjects
-                .FirstOrDefaultAsync(ss => ss.Semesterid == semesterId && ss.Subjectid == subjectId);
+                .FirstOrDefaultAsync(ss => ss.SemesterId == semesterId && ss.SubjectId == subjectId);
         }
 
     }
