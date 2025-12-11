@@ -23,11 +23,11 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         {
             return _dbContext.Semesters
                 .Include(x => x.Exams)
-                .Include(x => x.Groups)
+                .Include(x => x.ClassGroups)
                 .Include(x => x.SemesterSubjects)
                     .ThenInclude(ss => ss.Subject)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Semesterid == id);
+                .FirstOrDefaultAsync(x => x.SemesterId == id);
         }
 
         public async Task<(IReadOnlyList<Semester> Items, int Total)> GetPagedWithDetailsAsync(
@@ -35,27 +35,27 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         {
             var query = _dbContext.Semesters
                 .Include(x => x.Exams)
-                .Include(x => x.Groups)
+                .Include(x => x.ClassGroups)
                 .Include(x => x.SemesterSubjects)
                 .AsNoTracking()
                 .AsQueryable();
 
             if (filter != null)
             {
-                if (filter.Semesterid > 0)
-                    query = query.Where(x => x.Semesterid == filter.Semesterid);
+                if (filter.SemesterId > 0)
+                    query = query.Where(x => x.SemesterId == filter.SemesterId);
 
-                if (!string.IsNullOrWhiteSpace(filter.Semestercode))
-                    query = query.Where(x => x.Semestercode.Contains(filter.Semestercode));
+                if (!string.IsNullOrWhiteSpace(filter.SemesterCode))
+                    query = query.Where(x => x.SemesterCode.Contains(filter.SemesterCode));
 
-                if (filter.Isactive.HasValue)
-                    query = query.Where(x => x.Isactive == filter.Isactive);
+                if (filter.IsActive.HasValue)
+                    query = query.Where(x => x.IsActive == filter.IsActive);
             }
 
             var total = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(x => x.Createat)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -67,7 +67,7 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         {
             return _dbContext.Semesters
                  .Include(x => x.Exams)
-                 .Include(x => x.Groups)
+                 .Include(x => x.ClassGroups)
                  .Include(x => x.SemesterSubjects)
                      .ThenInclude(ss => ss.Subject)
                  .AsQueryable();
@@ -76,11 +76,11 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         public async Task<bool> ExistsWithCodeAsync(string code, int excludeId)
         {
             return await _dbContext.Semesters
-                .AnyAsync(s => s.Semestercode == code && s.Semesterid != excludeId);
+                .AnyAsync(s => s.SemesterCode == code && s.SemesterId != excludeId);
         }
         public async Task<bool> ExistsAsync(int semesterId)
         {
-            return await _dbContext.Semesters.AnyAsync(s => s.Semesterid == semesterId);
+            return await _dbContext.Semesters.AnyAsync(s => s.SemesterId == semesterId);
         }
 
     }

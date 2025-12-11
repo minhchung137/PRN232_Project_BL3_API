@@ -10,7 +10,7 @@ namespace PRN232_GradingSystem_Services.BusinessModel
 
         public DateTime? Createat { get; set; }
 
-        public Group Group { get; set; }
+        public ClassGroup Group { get; set; }
         public Student Student { get; set; }
     }
 }

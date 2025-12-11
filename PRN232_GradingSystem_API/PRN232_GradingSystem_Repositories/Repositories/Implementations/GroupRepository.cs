@@ -10,7 +10,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 {
-    public class GroupRepository : EntityRepository<Group>, IGroupRepository
+    public class GroupRepository : EntityRepository<ClassGroup>, IGroupRepository
     {
         private readonly PRN232_GradingSystem_APIContext _dbContext;
 
@@ -20,49 +20,49 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
             _dbContext = dbContext;
         }
 
-        public override Task<Group> GetByIdWithDetailsAsync(int id)
+        public override Task<ClassGroup> GetByIdWithDetailsAsync(int id)
         {
-            return _dbContext.Groups
+            return _dbContext.ClassGroups
                 .Include(x => x.Semester)
                 .Include(x => x.GroupStudents)
                 .ThenInclude(gs => gs.Student)
-                .Include(x => x.CreatebyNavigation)
-                .Include(x => x.UpdatebyNavigation)
+                .Include(x => x.CreatedByNavigation)
+                .Include(x => x.UpdatedByNavigation)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Groupid == id);
+                .FirstOrDefaultAsync(x => x.GroupId == id);
         }
 
-        public async Task<(IReadOnlyList<Group> Items, int Total)> GetPagedWithDetailsAsync(
-            Group filter, int pageNumber, int pageSize)
+        public async Task<(IReadOnlyList<ClassGroup> Items, int Total)> GetPagedWithDetailsAsync(
+            ClassGroup filter, int pageNumber, int pageSize)
         {
-            var query = _dbContext.Groups
+            var query = _dbContext.ClassGroups
                 .Include(x => x.Semester)
                 .Include(x => x.GroupStudents)
-                .Include(x => x.CreatebyNavigation)
-                .Include(x => x.UpdatebyNavigation)
+                .Include(x => x.CreatedByNavigation)
+                .Include(x => x.UpdatedByNavigation)
                 .AsNoTracking()
                 .AsQueryable();
 
             if (filter != null)
             {
-                if (filter.Groupid > 0)
-                    query = query.Where(x => x.Groupid == filter.Groupid);
+                if (filter.GroupId > 0)
+                    query = query.Where(x => x.GroupId == filter.GroupId);
 
-                if (!string.IsNullOrWhiteSpace(filter.Groupname))
-                    query = query.Where(x => x.Groupname.Contains(filter.Groupname));
+                if (!string.IsNullOrWhiteSpace(filter.GroupName))
+                    query = query.Where(x => x.GroupName.Contains(filter.GroupName));
 
-                if (filter.Semesterid.HasValue)
-                    query = query.Where(x => x.Semesterid == filter.Semesterid);
+                if (filter.SemesterId.HasValue)
+                    query = query.Where(x => x.SemesterId == filter.SemesterId);
 
-                if (filter.Createby.HasValue)
-                    query = query.Where(x => x.Createby == filter.Createby);
-                if (filter.Updateby.HasValue)
-                    query = query.Where(x => x.Updateby == filter.Updateby);
+                if (filter.CreatedBy.HasValue)
+                    query = query.Where(x => x.CreatedBy == filter.CreatedBy);
+                if (filter.UpdatedBy.HasValue)
+                    query = query.Where(x => x.UpdatedBy == filter.UpdatedBy);
             }
 
             var total = await query.CountAsync();
             var items = await query
-                .OrderByDescending(x => x.Createat) // sort theo ngày tạo mới nhất
+                .OrderByDescending(x => x.CreatedAt) // sort theo ngày tạo mới nhất
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -70,22 +70,22 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
             return (items, total);
         }
 
-        public IQueryable<Group> GetAllWithDetails()
+        public IQueryable<ClassGroup> GetAllWithDetails()
         {
-            return _dbContext.Groups
+            return _dbContext.ClassGroups
                 .Include(x => x.Semester)
                 .Include(x => x.GroupStudents)
-                .Include(x => x.CreatebyNavigation)
-                .Include(x => x.UpdatebyNavigation)
+                .Include(x => x.CreatedByNavigation)
+                .Include(x => x.UpdatedByNavigation)
                 .AsQueryable();
         }
         public async Task<bool> ExistsWithNameAsync(string groupName, int semesterId, int excludeId = 0)
         {
-            return await _dbContext.Groups
+            return await _dbContext.ClassGroups
                 .AnyAsync(g =>
-                    g.Groupname.ToLower() == groupName.ToLower() &&
-                    g.Semesterid == semesterId &&
-                    g.Groupid != excludeId);
+                    g.GroupName.ToLower() == groupName.ToLower() &&
+                    g.SemesterId == semesterId &&
+                    g.GroupId != excludeId);
         }
 
     }

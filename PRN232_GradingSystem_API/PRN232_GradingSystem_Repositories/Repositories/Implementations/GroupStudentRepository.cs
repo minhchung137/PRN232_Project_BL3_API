@@ -25,7 +25,7 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                 .Include(x => x.Group)
                 .Include(x => x.Student)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Groupid == groupId && x.Studentid == studentId);
+                .FirstOrDefaultAsync(x => x.GroupId == groupId && x.StudentId == studentId);
         }
 
         public async Task<(IReadOnlyList<GroupStudent> Items, int Total)> GetPagedWithDetailsAsync(
@@ -39,16 +39,16 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 
             if (filter != null)
             {
-                if (filter.Groupid > 0)
-                    query = query.Where(x => x.Groupid == filter.Groupid);
+                if (filter.GroupId > 0)
+                    query = query.Where(x => x.GroupId == filter.GroupId);
 
-                if (filter.Studentid > 0)
-                    query = query.Where(x => x.Studentid == filter.Studentid);
+                if (filter.StudentId > 0)
+                    query = query.Where(x => x.StudentId == filter.StudentId);
             }
 
             var total = await query.CountAsync();
             var items = await query
-                .OrderByDescending(x => x.Createat)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -67,7 +67,7 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         public async Task<GroupStudent?> GetByIdAsync(int groupId, int studentId, bool trackChanges = false)
         {
             var query = _dbContext.GroupStudents
-                .Where(gs => gs.Groupid == groupId && gs.Studentid == studentId);
+                .Where(gs => gs.GroupId == groupId && gs.StudentId == studentId);
 
             if (!trackChanges)
                 query = query.AsNoTracking();
@@ -79,7 +79,7 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         public async Task<bool> ExistsAsync(int groupId, int studentId)
         {
             return await _dbContext.GroupStudents
-                .AnyAsync(gs => gs.Groupid == groupId && gs.Studentid == studentId);
+                .AnyAsync(gs => gs.GroupId == groupId && gs.StudentId == studentId);
         }
     }
 }

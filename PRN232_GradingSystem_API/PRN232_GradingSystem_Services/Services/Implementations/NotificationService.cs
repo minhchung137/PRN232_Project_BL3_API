@@ -23,28 +23,28 @@ public class NotificationService : INotificationService
 
     public async Task SendGradeCreatedNotificationAsync(Grade grade)
     {
-        if (!grade.Submissionid.HasValue)
+        if (!grade.SubmissionId.HasValue)
             return;
 
-        var gradeWithDetails = await _unitOfWork.GradeRepository.GetByIdWithDetailsAsync(grade.Gradeid);
+        var gradeWithDetails = await _unitOfWork.GradeRepository.GetByIdWithDetailsAsync(grade.GradeId);
         if (gradeWithDetails == null)
             return;
 
-        var submission = await _unitOfWork.SubmissionRepository.GetByIdWithDetailsAsync(grade.Submissionid.Value);
+        var submission = await _unitOfWork.SubmissionRepository.GetByIdWithDetailsAsync(grade.SubmissionId.Value);
         if (submission == null || submission.Student == null)
             return;
 
-        var studentRoll = submission.Student.Studentroll ?? "unknown";
+        var studentRoll = submission.Student.StudentRoll ?? "unknown";
 
-        var gradeDetails = gradeWithDetails.Gradedetails?
+        var gradeDetails = gradeWithDetails.GradeDetails?
             .Select(gd => new GradeDetailNotification
             {
-                GradedetailId = gd.Gradedetailid,
-                Qcode = gd.Qcode,
-                Subcode = gd.Subcode,
+                GradedetailId = gd.GradeDetailId,
+                Qcode = gd.QCode,
+                Subcode = gd.SubCode,
                 Point = gd.Point,
                 Note = gd.Note,
-                CreatedAt = gd.Createat
+                CreatedAt = gd.CreatedAt
             })
             .ToList()
             ?? new List<GradeDetailNotification>();
@@ -52,12 +52,12 @@ public class NotificationService : INotificationService
         var notification = new
         {
             Type = "GradeCreated",
-            GradeId = grade.Gradeid,
-            SubmissionId = grade.Submissionid,
+            GradeId = grade.GradeId,
+            SubmissionId = grade.SubmissionId,
             StudentId = studentRoll,
-            TotalScore = grade.Totalscore,
+            TotalScore = grade.TotalScore,
             Status = grade.Status,
-            CreatedAt = grade.Createat,
+            CreatedAt = grade.CreatedAt,
             Q1 = grade.Q1,
             Q2 = grade.Q2,
             Q3 = grade.Q3,
@@ -65,7 +65,7 @@ public class NotificationService : INotificationService
             Q5 = grade.Q5,
             Q6 = grade.Q6,
             GradeDetails = gradeDetails,
-            Message = $"Grade đã được tạo cho submission #{grade.Submissionid} với tổng điểm: {grade.Totalscore}"
+            Message = $"Grade đã được tạo cho submission #{grade.SubmissionId} với tổng điểm: {grade.TotalScore}"
         };
 
         await _hubContext.Clients.Group($"student_{studentRoll}").SendAsync("GradeCreated", notification);

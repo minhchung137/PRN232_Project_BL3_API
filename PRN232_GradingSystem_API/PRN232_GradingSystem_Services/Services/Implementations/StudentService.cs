@@ -29,10 +29,10 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var repositoryFilter = new Student
             {
-                Studentid = filter?.Studentid ?? 0,
-                Studentfullname = filter?.Studentfullname,
-                Studentroll = filter?.Studentroll,
-                Isactive = filter?.Isactive
+                StudentId = filter?.Studentid ?? 0,
+                StudentFullname = filter?.Studentfullname,
+                StudentRoll = filter?.Studentroll,
+                IsActive = filter?.Isactive
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);
@@ -71,8 +71,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             // ===== MAP & SAVE =====
             var entity = _mapper.Map<Student>(model);
-            entity.Createat = DateTime.UtcNow;
-            entity.Isactive ??= true;
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.IsActive ??= true;
 
             await repo.AddAsync(entity);
             await UnitOfWork.SaveChangesAsync();
@@ -97,10 +97,10 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
 
             // ===== CẬP NHẬT =====
-            existing.Studentfullname = model.Studentfullname ?? existing.Studentfullname;
-            existing.Studentroll = model.Studentroll ?? existing.Studentroll;
-            existing.Isactive = model.Isactive ?? existing.Isactive;
-            existing.Createat ??= existing.Createat; // giữ nguyên
+            existing.StudentFullname = model.Studentfullname ?? existing.StudentFullname;
+            existing.StudentRoll = model.Studentroll ?? existing.StudentRoll;
+            existing.IsActive = model.Isactive ?? existing.IsActive;
+            existing.CreatedAt ??= existing.CreatedAt; // giữ nguyên
 
             repo.Update(existing);
             await UnitOfWork.SaveChangesAsync();
@@ -117,10 +117,10 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 return false;
 
             // ===== CẬP NHẬT TRẠNG THÁI =====
-            existing.Isactive = false;
-            existing.Studentfullname = existing.Studentfullname;
-            existing.Studentroll = existing.Studentroll;
-            existing.Createat ??= existing.Createat; // giữ nguyên
+            existing.IsActive = false;
+            existing.StudentFullname = existing.StudentFullname;
+            existing.StudentRoll = existing.StudentRoll;
+            existing.CreatedAt ??= existing.CreatedAt; // giữ nguyên
 
             repo.Update(existing);
             await UnitOfWork.SaveChangesAsync();

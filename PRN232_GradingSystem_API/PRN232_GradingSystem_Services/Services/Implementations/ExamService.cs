@@ -26,11 +26,11 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var repositoryFilter = new Exam
             {
-                Examid = filter?.Examid ?? 0,
-                Examname = filter?.Examname,
-                Semesterid = filter?.Semesterid,
-                Subjectid = filter?.Subjectid,
-                Examdate = filter?.Examdate,
+                ExamId = filter?.Examid ?? 0,
+                ExamName = filter?.Examname,
+                SemesterId = filter?.Semesterid,
+                SubjectId = filter?.Subjectid,
+                ExamDate = filter?.Examdate,
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);
@@ -84,7 +84,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             // === MAP & SAVE ===
             var entity = _mapper.Map<Exam>(model);
-            entity.Createat = DateTime.UtcNow;
+            entity.CreatedAt = DateTime.UtcNow;
 
             await examRepo.AddAsync(entity);
             await UnitOfWork.SaveChangesAsync();
@@ -120,16 +120,16 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             }
 
             // Kiểm tra trùng tên kỳ thi trong cùng Semester + Subject
-            var exists = await examRepo.ExistsByNameAsync(model.Examname ?? existing.Examname, excludeId: id);
+            var exists = await examRepo.ExistsByNameAsync(model.Examname ?? existing.ExamName, excludeId: id);
             if (exists)
                 throw new ConflictException($"Exam '{model.Examname}' already exists.");
 
             // === UPDATE FIELDS ===
-            existing.Examname = model.Examname ?? existing.Examname;
-            existing.Semesterid = model.Semesterid ?? existing.Semesterid;
-            existing.Subjectid = model.Subjectid ?? existing.Subjectid;
-            existing.Examdate = model.Examdate ?? existing.Examdate;
-            existing.Createat = existing.Createat;
+            existing.ExamName = model.Examname ?? existing.ExamName;
+            existing.SemesterId = model.Semesterid ?? existing.SemesterId;
+            existing.SubjectId = model.Subjectid ?? existing.SubjectId;
+            existing.ExamDate = model.Examdate ?? existing.ExamDate;
+            existing.CreatedAt = existing.CreatedAt;
             examRepo.Update(existing);
             await UnitOfWork.SaveChangesAsync();
 

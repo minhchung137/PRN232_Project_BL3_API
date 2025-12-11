@@ -23,10 +23,10 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         {
             return _dbContext.Grades
                 .Include(x => x.Submission)
-                .Include(x => x.MarkerNavigation)
-                .Include(x => x.Gradedetails)
+                .Include(x => x.Marker)
+                .Include(x => x.GradeDetails)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Gradeid == id);
+                .FirstOrDefaultAsync(x => x.GradeId == id);
         }
 
         public async Task<(IReadOnlyList<Grade> Items, int Total)> GetPagedWithDetailsAsync(
@@ -34,21 +34,21 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         {
             var query = _dbContext.Grades
                 .Include(x => x.Submission)
-                .Include(x => x.MarkerNavigation)
-                .Include(x => x.Gradedetails)
+                .Include(x => x.Marker)
+                .Include(x => x.GradeDetails)
                 .AsNoTracking()
                 .AsQueryable();
 
             if (filter != null)
             {
-                if (filter.Gradeid > 0)
-                    query = query.Where(x => x.Gradeid == filter.Gradeid);
+                if (filter.GradeId > 0)
+                    query = query.Where(x => x.GradeId == filter.GradeId);
 
-                if (filter.Submissionid.HasValue)
-                    query = query.Where(x => x.Submissionid == filter.Submissionid);
+                if (filter.SubmissionId.HasValue)
+                    query = query.Where(x => x.SubmissionId == filter.SubmissionId);
 
-                if (filter.Marker.HasValue)
-                    query = query.Where(x => x.Marker == filter.Marker);
+                if (filter.MarkerId.HasValue)
+                    query = query.Where(x => x.MarkerId == filter.MarkerId);
 
                 if (filter.Q1.HasValue)
                     query = query.Where(x => x.Q1 == filter.Q1);
@@ -68,22 +68,22 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                 if (filter.Q6.HasValue)
                     query = query.Where(x => x.Q6 == filter.Q6);
 
-                if (filter.Totalscore.HasValue)
-                    query = query.Where(x => x.Totalscore >= filter.Totalscore);
+                if (filter.TotalScore.HasValue)
+                    query = query.Where(x => x.TotalScore >= filter.TotalScore);
                 if (!string.IsNullOrWhiteSpace(filter.Status))
                     query = query.Where(x => x.Status == filter.Status);
 
-                if (filter.Createat.HasValue)
-                    query = query.Where(x => x.Createat.Value.Date == filter.Createat.Value.Date);
+                if (filter.CreatedAt.HasValue)
+                    query = query.Where(x => x.CreatedAt.Value.Date == filter.CreatedAt.Value.Date);
 
-                if (filter.Updateat.HasValue)
-                    query = query.Where(x => x.Updateat.Value.Date == filter.Updateat.Value.Date);
+                if (filter.UpdatedAt.HasValue)
+                    query = query.Where(x => x.UpdatedAt.Value.Date == filter.UpdatedAt.Value.Date);
             }
 
             var total = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(x => x.Createat)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -96,13 +96,13 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         {
             return _dbContext.Grades
                 .Include(x => x.Submission)
-                .Include(x => x.MarkerNavigation)
-                .Include(x => x.Gradedetails)
+                .Include(x => x.Marker)
+                .Include(x => x.GradeDetails)
                 .AsQueryable();
         }
         public async Task<bool> ExistsAsync(int gradeid)
         {
-            return await _dbContext.Grades.AnyAsync(s => s.Gradeid == gradeid);
+            return await _dbContext.Grades.AnyAsync(s => s.GradeId == gradeid);
         }
     }
 }

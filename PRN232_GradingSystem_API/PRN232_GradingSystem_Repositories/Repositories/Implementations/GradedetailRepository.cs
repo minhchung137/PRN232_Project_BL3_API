@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 {
-    public class GradedetailRepository : EntityRepository<Gradedetail>, IGradedetailRepository
+    public class GradedetailRepository : EntityRepository<GradeDetail>, IGradedetailRepository
     {
         private readonly PRN232_GradingSystem_APIContext _dbContext;
 
@@ -19,35 +19,35 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
             _dbContext = dbContext;
         }
 
-        public override Task<Gradedetail> GetByIdWithDetailsAsync(int id)
+        public override Task<GradeDetail> GetByIdWithDetailsAsync(int id)
         {
-            return _dbContext.Gradedetails
+            return _dbContext.GradeDetails
                 .Include(x => x.Grade)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Gradedetailid == id);
+                .FirstOrDefaultAsync(x => x.GradeDetailId == id);
         }
 
-        public async Task<(IReadOnlyList<Gradedetail> Items, int Total)> GetPagedWithDetailsAsync(
-            Gradedetail filter, int pageNumber, int pageSize)
+        public async Task<(IReadOnlyList<GradeDetail> Items, int Total)> GetPagedWithDetailsAsync(
+            GradeDetail filter, int pageNumber, int pageSize)
         {
-            var query = _dbContext.Gradedetails
+            var query = _dbContext.GradeDetails
                 .Include(x => x.Grade)
                 .AsNoTracking()
                 .AsQueryable();
 
             if (filter != null)
             {
-                if (filter.Gradedetailid > 0)
-                    query = query.Where(x => x.Gradedetailid == filter.Gradedetailid);
+                if (filter.GradeDetailId > 0)
+                    query = query.Where(x => x.GradeDetailId == filter.GradeDetailId);
 
-                if (filter.Gradeid.HasValue)
-                    query = query.Where(x => x.Gradeid == filter.Gradeid);
+                if (filter.GradeId.HasValue)
+                    query = query.Where(x => x.GradeId == filter.GradeId);
 
-                if (!string.IsNullOrWhiteSpace(filter.Qcode))
-                    query = query.Where(x => x.Qcode.Contains(filter.Qcode));
+                if (!string.IsNullOrWhiteSpace(filter.QCode))
+                    query = query.Where(x => x.QCode.Contains(filter.QCode));
 
-                if (!string.IsNullOrWhiteSpace(filter.Subcode))
-                    query = query.Where(x => x.Subcode.Contains(filter.Subcode));
+                if (!string.IsNullOrWhiteSpace(filter.SubCode))
+                    query = query.Where(x => x.SubCode.Contains(filter.SubCode));
 
                 if (filter.Point.HasValue)
                     query = query.Where(x => x.Point >= filter.Point);
@@ -55,23 +55,23 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 
             var total = await query.CountAsync();
             var items = await query
-                .OrderByDescending(x => x.Createat) // sort theo ngày tạo mới nhất
+                .OrderByDescending(x => x.CreatedAt) // sort theo ngày tạo mới nhất
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
             return (items, total);
         }
-        public IQueryable<Gradedetail> GetAllWithDetails()
+        public IQueryable<GradeDetail> GetAllWithDetails()
         {
-            return _dbContext.Gradedetails
+            return _dbContext.GradeDetails
                  .Include(x => x.Grade)
                 .AsQueryable();
         }
-        public async Task<IEnumerable<Gradedetail>> GetByGradeIdAsync(int gradeId)
+        public async Task<IEnumerable<GradeDetail>> GetByGradeIdAsync(int gradeId)
         {
-            return await _dbContext.Gradedetails
-                .Where(g => g.Gradeid == gradeId)
+            return await _dbContext.GradeDetails
+                .Where(g => g.GradeId == gradeId)
                 .ToListAsync();
         }
     }

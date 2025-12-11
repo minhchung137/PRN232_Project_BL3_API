@@ -26,9 +26,9 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var repositoryFilter = new Semester
             {
-                Semesterid = filter?.Semesterid ?? 0,
-                Semestercode = filter?.Semestercode,
-                Isactive = filter?.Isactive
+                SemesterId = filter?.Semesterid ?? 0,
+                SemesterCode = filter?.Semestercode,
+                IsActive = filter?.Isactive
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);
@@ -75,8 +75,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 return null;
             }
             model.Semesterid = id;
-            model.Createat = existing.Createat;
-            model.Createby = existing.Createby;
+            model.Createat = existing.CreatedAt;
+            model.Createby = existing.CreatedBy;
             _mapper.Map(model, existing);
             repo.Update(existing);
             await UnitOfWork.SaveChangesAsync();
@@ -115,8 +115,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             if (existing == null)
                 return null;
 
-            existing.Isactive = false;
-            existing.Updateat = DateTime.UtcNow;
+            existing.IsActive = false;
+            existing.UpdatedAt = DateTime.UtcNow;
 
             repo.Update(existing);
             await UnitOfWork.SaveChangesAsync();

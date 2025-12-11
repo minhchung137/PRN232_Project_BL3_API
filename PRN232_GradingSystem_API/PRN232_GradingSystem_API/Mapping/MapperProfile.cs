@@ -117,9 +117,9 @@ namespace PRN232_GradingSystem_API.Mapping
 
 
             CreateMap<Exam, ExamBM>()
-                .ForMember(dest => dest.Examid, opt => opt.MapFrom(src => src.Examid))
-                .ForMember(dest => dest.Semesterid, opt => opt.MapFrom(src => src.Semesterid))
-                .ForMember(dest => dest.Subjectid, opt => opt.MapFrom(src => src.Subjectid))
+                .ForMember(dest => dest.Examid, opt => opt.MapFrom(src => src.ExamId))
+                .ForMember(dest => dest.Semesterid, opt => opt.MapFrom(src => src.SemesterId))
+                .ForMember(dest => dest.Subjectid, opt => opt.MapFrom(src => src.SubjectId))
                 .ForMember(dest => dest.Semester, opt => opt.MapFrom(src => src.Semester))
                 .ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Subject))
                 //.ForMember(dest => dest.Submissions, opt => opt.MapFrom(src => src.Submissions))
@@ -130,10 +130,10 @@ namespace PRN232_GradingSystem_API.Mapping
 
             CreateMap<Grade, GradeBM>().ReverseMap()
         .ForMember(dest => dest.Submission, opt => opt.Ignore())
-        .ForMember(dest => dest.MarkerNavigation, opt => opt.Ignore())
-        .ForMember(dest => dest.Gradedetails, opt => opt.Ignore());
+        .ForMember(dest => dest.Marker, opt => opt.Ignore())
+        .ForMember(dest => dest.GradeDetails, opt => opt.Ignore());
 
-            CreateMap<Gradedetail, GradedetailBM>().ReverseMap()
+            CreateMap<GradeDetail, GradedetailBM>().ReverseMap()
         .ForMember(dest => dest.Grade, opt => opt.Ignore());
 
             CreateMap<Subject, SubjectBM>().ReverseMap()
@@ -146,11 +146,11 @@ namespace PRN232_GradingSystem_API.Mapping
         .ForMember(dest => dest.Student, opt => opt.Ignore())
         .ForMember(dest => dest.Grades, opt => opt.Ignore());
 
-            CreateMap<Group, GroupBM>().ReverseMap()
+            CreateMap<ClassGroup, GroupBM>().ReverseMap()
         .ForMember(dest => dest.Semester, opt => opt.Ignore())
         .ForMember(dest => dest.GroupStudents, opt => opt.Ignore())
-        .ForMember(dest => dest.CreatebyNavigation, opt => opt.Ignore())
-        .ForMember(dest => dest.UpdatebyNavigation, opt => opt.Ignore());
+        .ForMember(dest => dest.CreatedByNavigation, opt => opt.Ignore())
+        .ForMember(dest => dest.UpdatedByNavigation, opt => opt.Ignore());
 
 
             CreateMap<GroupStudent, GroupStudentBM>().ReverseMap()
@@ -159,17 +159,17 @@ namespace PRN232_GradingSystem_API.Mapping
 
             CreateMap<Semester, SemesterBM>().ReverseMap()
         .ForMember(dest => dest.Exams, opt => opt.Ignore())
-        .ForMember(dest => dest.Groups, opt => opt.Ignore())
+        .ForMember(dest => dest.ClassGroups, opt => opt.Ignore())
         .ForMember(dest => dest.SemesterSubjects, opt => opt.Ignore());
 
             CreateMap<SemesterSubject, SemesterSubjectBM>().ReverseMap()
         .ForMember(dest => dest.Semester, opt => opt.Ignore())
         .ForMember(dest => dest.Subject, opt => opt.Ignore());
 
-            CreateMap<User, UserBM>().ReverseMap()
+            CreateMap<AppUser, UserBM>().ReverseMap()
         .ForMember(dest => dest.Grades, opt => opt.Ignore())
-        .ForMember(dest => dest.GroupCreatebyNavigations, opt => opt.Ignore())
-        .ForMember(dest => dest.GroupUpdatebyNavigations, opt => opt.Ignore());
+        .ForMember(dest => dest.ClassGroupCreatedByNavigations, opt => opt.Ignore())
+        .ForMember(dest => dest.ClassGroupUpdatedByNavigations, opt => opt.Ignore());
 
             CreateMap<Student, StudentBM>().ReverseMap()
                 .ForMember(dest => dest.Submissions, opt => opt.Ignore())
