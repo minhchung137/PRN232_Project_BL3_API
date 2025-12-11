@@ -25,7 +25,7 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                 .Include(x => x.Subject)
                 .Include(x => x.Submissions)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Examid == id);
+                .FirstOrDefaultAsync(x => x.ExamId == id);
         }
 
         public async Task<(IReadOnlyList<Exam> Items, int Total)> GetPagedWithDetailsAsync(
@@ -40,22 +40,22 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 
             if (filter != null)
             {
-                if (filter.Examid > 0)
-                    query = query.Where(x => x.Examid == filter.Examid);
+                if (filter.ExamId > 0)
+                    query = query.Where(x => x.ExamId == filter.ExamId);
 
-                if (!string.IsNullOrWhiteSpace(filter.Examname))
-                    query = query.Where(x => x.Examname.Contains(filter.Examname));
+                if (!string.IsNullOrWhiteSpace(filter.ExamName))
+                    query = query.Where(x => x.ExamName.Contains(filter.ExamName));
 
-                if (filter.Semesterid.HasValue)
-                    query = query.Where(x => x.Semesterid == filter.Semesterid);
+                if (filter.SemesterId.HasValue)
+                    query = query.Where(x => x.SemesterId == filter.SemesterId);
 
-                if (filter.Subjectid.HasValue)
-                    query = query.Where(x => x.Subjectid == filter.Subjectid);
+                if (filter.SubjectId.HasValue)
+                    query = query.Where(x => x.SubjectId == filter.SubjectId);
             }
 
             var total = await query.CountAsync();
             var items = await query
-                .OrderByDescending(x => x.Createat) 
+                .OrderByDescending(x => x.CreatedAt) 
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -73,11 +73,11 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
         public async Task<bool> ExistsByNameAsync(string examName, int excludeId)
         {
             return await _dbContext.Exams.AnyAsync(e =>
-                e.Examname.ToLower() == examName.ToLower() && e.Examid != excludeId);
+                e.ExamName.ToLower() == examName.ToLower() && e.ExamId != excludeId);
         }
         public async Task<bool> ExistsAsync(int examid)
         {
-            return await _dbContext.Exams.AnyAsync(s => s.Examid == examid);
+            return await _dbContext.Exams.AnyAsync(s => s.ExamId == examid);
         }
         public async Task<Exam> GetExamWithFullDataAsync(int examId)
         {
@@ -88,11 +88,11 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                             .ThenInclude(gs => gs.Group)
                 .Include(e => e.Submissions)
                     .ThenInclude(s => s.Grades)
-                        .ThenInclude(g => g.Gradedetails)
+                        .ThenInclude(g => g.GradeDetails)
                 .Include(e => e.Submissions)
                     .ThenInclude(s => s.Grades)
-                        .ThenInclude(g => g.MarkerNavigation)
-                .FirstOrDefaultAsync(e => e.Examid == examId);
+                        .ThenInclude(g => g.Marker)
+                .FirstOrDefaultAsync(e => e.ExamId == examId);
         }
 
     }

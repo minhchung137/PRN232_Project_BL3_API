@@ -248,8 +248,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var sortedSubmissions = exam.Submissions
                 .Where(s => s.Student != null)
-                .OrderBy(s => s.Student.GroupStudents.FirstOrDefault()?.Group?.Groupname ?? "")
-                .ThenBy(s => s.Student.Studentroll ?? "")
+                .OrderBy(s => s.Student.GroupStudents.FirstOrDefault()?.Group?.GroupName ?? "")
+                .ThenBy(s => s.Student.StudentRoll ?? "")
                 .ToList();
 
             foreach (var submission in sortedSubmissions)
@@ -260,7 +260,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 if (student == null) continue;
 
                 // Lấy groupname từ GroupStudents
-                var groupName = student.GroupStudents.FirstOrDefault()?.Group?.Groupname ?? "";
+                var groupName = student.GroupStudents.FirstOrDefault()?.Group?.GroupName ?? "";
 
                 // Lấy Grade (chỉ có 1 Grade per Submission)
                 var grade = submission.Grades?.FirstOrDefault();
@@ -270,21 +270,21 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 worksheet.Cells[row, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 worksheet.Cells[row, 2].Value = groupName;
                 worksheet.Cells[row, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                worksheet.Cells[row, 3].Value = student.Studentroll ?? "";
+                worksheet.Cells[row, 3].Value = student.StudentRoll ?? "";
                 worksheet.Cells[row, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                worksheet.Cells[row, 4].Value = student.Studentfullname ?? "";
+                worksheet.Cells[row, 4].Value = student.StudentFullname ?? "";
                 worksheet.Cells[row, 5].Value = submission.Solution ?? "";
-                worksheet.Cells[row, 6].Value = grade?.MarkerNavigation?.Username ?? "";
+                worksheet.Cells[row, 6].Value = grade?.Marker?.Username ?? "";
                 worksheet.Cells[row, 6].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
                 // Fill detail scores từ GradeDetails
-                if (grade?.Gradedetails != null)
+                if (grade?.GradeDetails != null)
                 {
-                    FillDetailScores(worksheet, row, grade.Gradedetails);
+                    FillDetailScores(worksheet, row, grade.GradeDetails);
                 }
 
                 // Total score từ Grade.TotalScore hoặc tính từ Q1-Q6
-                decimal totalScore = grade?.Totalscore ??
+                decimal totalScore = grade?.TotalScore ??
                     ((grade?.Q1 ?? 0) + (grade?.Q2 ?? 0) + (grade?.Q3 ?? 0) +
                      (grade?.Q4 ?? 0) + (grade?.Q5 ?? 0) + (grade?.Q6 ?? 0));
 
@@ -330,7 +330,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             }
         }
 
-        private void FillDetailScores(ExcelWorksheet worksheet, int row, ICollection<Gradedetail> gradeDetails)
+        private void FillDetailScores(ExcelWorksheet worksheet, int row, ICollection<GradeDetail> gradeDetails)
         {
             if (gradeDetails == null || !gradeDetails.Any()) return;
 
@@ -349,7 +349,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
                     // Tìm GradeDetail theo QCode và SubCode
                     var detail = gradeDetails.FirstOrDefault(gd =>
-                        gd.Qcode == question.Qcode && gd.Subcode == subKey);
+                        gd.QCode == question.Qcode && gd.SubCode == subKey);
 
                     if (detail != null)
                     {

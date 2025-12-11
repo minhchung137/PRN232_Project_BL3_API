@@ -29,8 +29,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var repositoryFilter = new SemesterSubject
             {
-                Semesterid = filter?.Semesterid ?? 0,
-                Subjectid = filter?.Subjectid ?? 0
+                SemesterId = filter?.Semesterid ?? 0,
+                SubjectId = filter?.Subjectid ?? 0
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);

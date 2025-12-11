@@ -1,79 +1,119 @@
 ﻿using AutoMapper;
 using PRN232_GradingSystem_Repositories.Models;
 using PRN232_GradingSystem_Services.BusinessModel;
+
 namespace PRN232_GradingSystem_Services.Helpers
 {
     public class ServiceMappingProfile : Profile
     {
         public ServiceMappingProfile()
         {
+            // 1. MAPPING EXAM
             CreateMap<Exam, ExamBM>()
-                .ForMember(dest => dest.Examid, opt => opt.MapFrom(src => src.Examid))
-                .ForMember(dest => dest.Semesterid, opt => opt.MapFrom(src => src.Semesterid))
-                .ForMember(dest => dest.Subjectid, opt => opt.MapFrom(src => src.Subjectid))
-                .ForMember(dest => dest.Semester, opt => opt.MapFrom(src => src.Semester))
-                .ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Subject))
-                //.ForMember(dest => dest.Submissions, opt => opt.MapFrom(src => src.Submissions))
+                .ForMember(dest => dest.Examid, opt => opt.MapFrom(src => src.ExamId))
+                .ForMember(dest => dest.Semesterid, opt => opt.MapFrom(src => src.SemesterId))
+                .ForMember(dest => dest.Subjectid, opt => opt.MapFrom(src => src.SubjectId))
                 .ReverseMap()
-                .ForMember(dest => dest.Semester, opt => opt.Ignore()) // tránh vòng lặp navigation
+                .ForMember(dest => dest.Semester, opt => opt.Ignore())
                 .ForMember(dest => dest.Subject, opt => opt.Ignore())
                 .ForMember(dest => dest.Submissions, opt => opt.Ignore());
 
-            CreateMap<Grade, GradeBM>().ReverseMap()
-        .ForMember(dest => dest.Submission, opt => opt.Ignore())
-        .ForMember(dest => dest.MarkerNavigation, opt => opt.Ignore())
-        .ForMember(dest => dest.Gradedetails, opt => opt.Ignore());
+            // 2. MAPPING GRADE (SỬA LỖI CHÍNH Ở ĐÂY)
+            CreateMap<Grade, GradeBM>()
+                .ForMember(dest => dest.Gradeid, opt => opt.MapFrom(src => src.GradeId))
+                .ForMember(dest => dest.Submissionid, opt => opt.MapFrom(src => src.SubmissionId))
+                // Map ID: Grade.MarkerId (Entity) -> GradeBM.Marker (int)
+                .ForMember(dest => dest.Marker, opt => opt.MapFrom(src => src.MarkerId))
+                // Map Navigation: Grade.Marker (Entity) -> GradeBM.MarkerNavigation
+                .ForMember(dest => dest.MarkerNavigation, opt => opt.MapFrom(src => src.Marker))
+                .ReverseMap()
+                .ForMember(dest => dest.Submission, opt => opt.Ignore())
+                // Khi map ngược: GradeBM.Marker (int) -> Grade.MarkerId
+                .ForMember(dest => dest.MarkerId, opt => opt.MapFrom(src => src.Marker))
+                // Bỏ qua Navigation khi map ngược để tránh lỗi
+                .ForMember(dest => dest.Marker, opt => opt.Ignore())
+                .ForMember(dest => dest.GradeDetails, opt => opt.Ignore());
 
-            CreateMap<Gradedetail, GradedetailBM>().ReverseMap()
-        .ForMember(dest => dest.Grade, opt => opt.Ignore());
+            // 3. MAPPING GRADEDETAIL
+            CreateMap<GradeDetail, GradedetailBM>()
+                .ForMember(dest => dest.Gradedetailid, opt => opt.MapFrom(src => src.GradeDetailId))
+                .ForMember(dest => dest.Gradeid, opt => opt.MapFrom(src => src.GradeId))
+                .ReverseMap()
+                .ForMember(dest => dest.Grade, opt => opt.Ignore());
 
-            CreateMap<Subject, SubjectBM>().ReverseMap()
-        .ForMember(dest => dest.Exams, opt => opt.Ignore())
-        .ForMember(dest => dest.SemesterSubjects, opt => opt.Ignore());
-
-
-            CreateMap<Submission, SubmissionBM>().ReverseMap()
-        .ForMember(dest => dest.Exam, opt => opt.Ignore())
-        .ForMember(dest => dest.Student, opt => opt.Ignore())
-        .ForMember(dest => dest.Grades, opt => opt.Ignore());
-
-            CreateMap<Group, GroupBM>().ReverseMap()
-        .ForMember(dest => dest.Semester, opt => opt.Ignore())
-        .ForMember(dest => dest.GroupStudents, opt => opt.Ignore())
-        .ForMember(dest => dest.CreatebyNavigation, opt => opt.Ignore())
-        .ForMember(dest => dest.UpdatebyNavigation, opt => opt.Ignore());
-
-
-            CreateMap<GroupStudent, GroupStudentBM>().ReverseMap()
-        .ForMember(dest => dest.Group, opt => opt.Ignore())
-        .ForMember(dest => dest.Student, opt => opt.Ignore());
-
-            CreateMap<SemesterBM, Semester>()
-      .ForMember(dest => dest.Semesterid, opt => opt.Ignore()) // KHÓA CHÍNH
-      .ForMember(dest => dest.Exams, opt => opt.Ignore())
-      .ForMember(dest => dest.Groups, opt => opt.Ignore())
-      .ForMember(dest => dest.SemesterSubjects, opt => opt.Ignore());
-
-            CreateMap<Semester, SemesterBM>()
+            // 4. MAPPING SUBJECT
+            CreateMap<Subject, SubjectBM>()
+                .ForMember(dest => dest.Subjectid, opt => opt.MapFrom(src => src.SubjectId))
+                .ReverseMap()
                 .ForMember(dest => dest.Exams, opt => opt.Ignore())
-      .ForMember(dest => dest.Groups, opt => opt.Ignore())
-      .ForMember(dest => dest.SemesterSubjects, opt => opt.Ignore());
+                .ForMember(dest => dest.SemesterSubjects, opt => opt.Ignore());
 
+            // 5. MAPPING SUBMISSION
+            CreateMap<Submission, SubmissionBM>()
+                .ForMember(dest => dest.Submissionid, opt => opt.MapFrom(src => src.SubmissionId))
+                .ForMember(dest => dest.Examid, opt => opt.MapFrom(src => src.ExamId))
+                .ForMember(dest => dest.Studentid, opt => opt.MapFrom(src => src.StudentId))
+                .ReverseMap()
+                .ForMember(dest => dest.Exam, opt => opt.Ignore())
+                .ForMember(dest => dest.Student, opt => opt.Ignore())
+                .ForMember(dest => dest.Grades, opt => opt.Ignore());
 
-            CreateMap<SemesterSubject, SemesterSubjectBM>().ReverseMap()
-        .ForMember(dest => dest.Semester, opt => opt.Ignore())
-        .ForMember(dest => dest.Subject, opt => opt.Ignore());
+            // 6. MAPPING CLASSGROUP -> GROUPBM (Sửa Group -> ClassGroup)
+            CreateMap<ClassGroup, GroupBM>()
+                .ForMember(dest => dest.Groupid, opt => opt.MapFrom(src => src.GroupId))
+                .ForMember(dest => dest.Semesterid, opt => opt.MapFrom(src => src.SemesterId))
+                // Map Navigation CreateBy/UpdateBy từ ClassGroup sang BM
+                .ForMember(dest => dest.CreatebyNavigation, opt => opt.MapFrom(src => src.CreatedByNavigation))
+                .ForMember(dest => dest.UpdatebyNavigation, opt => opt.MapFrom(src => src.UpdatedByNavigation))
+                .ReverseMap()
+                .ForMember(dest => dest.Semester, opt => opt.Ignore())
+                .ForMember(dest => dest.GroupStudents, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedByNavigation, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedByNavigation, opt => opt.Ignore());
 
-            CreateMap<User, UserBM>().ReverseMap()
-        .ForMember(dest => dest.Grades, opt => opt.Ignore())
-        .ForMember(dest => dest.GroupCreatebyNavigations, opt => opt.Ignore())
-        .ForMember(dest => dest.GroupUpdatebyNavigations, opt => opt.Ignore());
+            // 7. MAPPING GROUPSTUDENT
+            CreateMap<GroupStudent, GroupStudentBM>()
+                .ForMember(dest => dest.Groupid, opt => opt.MapFrom(src => src.GroupId))
+                .ForMember(dest => dest.Studentid, opt => opt.MapFrom(src => src.StudentId))
+                .ReverseMap()
+                .ForMember(dest => dest.Group, opt => opt.Ignore())
+                .ForMember(dest => dest.Student, opt => opt.Ignore());
 
-            CreateMap<Student, StudentBM>().ReverseMap()
+            // 8. MAPPING SEMESTER
+            CreateMap<Semester, SemesterBM>()
+                .ForMember(dest => dest.Semesterid, opt => opt.MapFrom(src => src.SemesterId))
+                // Entity dùng ClassGroups, BM dùng Groups
+                .ForMember(dest => dest.Groups, opt => opt.MapFrom(src => src.ClassGroups))
+                .ReverseMap()
+                .ForMember(dest => dest.Exams, opt => opt.Ignore())
+                .ForMember(dest => dest.ClassGroups, opt => opt.Ignore())
+                .ForMember(dest => dest.SemesterSubjects, opt => opt.Ignore());
+
+            // 9. MAPPING SEMESTERSUBJECT
+            CreateMap<SemesterSubject, SemesterSubjectBM>()
+                .ForMember(dest => dest.Semesterid, opt => opt.MapFrom(src => src.SemesterId))
+                .ForMember(dest => dest.Subjectid, opt => opt.MapFrom(src => src.SubjectId))
+                .ReverseMap()
+                .ForMember(dest => dest.Semester, opt => opt.Ignore())
+                .ForMember(dest => dest.Subject, opt => opt.Ignore());
+
+            // 10. MAPPING APPUSER -> USERBM (Sửa User -> AppUser)
+            CreateMap<AppUser, UserBM>()
+                .ForMember(dest => dest.Userid, opt => opt.MapFrom(src => src.UserId))
+                .ReverseMap()
+                .ForMember(dest => dest.Grades, opt => opt.Ignore())
+                // Model mới dùng ClassGroupCreatedBy... thay vì GroupCreateby...
+                .ForMember(dest => dest.ClassGroupCreatedByNavigations, opt => opt.Ignore())
+                .ForMember(dest => dest.ClassGroupUpdatedByNavigations, opt => opt.Ignore())
+                .ForMember(dest => dest.SemesterCreatedByNavigations, opt => opt.Ignore())
+                .ForMember(dest => dest.SemesterUpdatedByNavigations, opt => opt.Ignore());
+
+            // 11. MAPPING STUDENT
+            CreateMap<Student, StudentBM>()
+                .ForMember(dest => dest.Studentid, opt => opt.MapFrom(src => src.StudentId))
+                .ReverseMap()
                 .ForMember(dest => dest.Submissions, opt => opt.Ignore())
                 .ForMember(dest => dest.GroupStudents, opt => opt.Ignore());
-
-
         }
     }
 }

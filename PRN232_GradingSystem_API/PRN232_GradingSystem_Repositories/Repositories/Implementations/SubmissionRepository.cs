@@ -25,9 +25,9 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                 .Include(s => s.Exam)
                 .Include(s => s.Student)
                 .Include(s => s.Grades)
-                    .ThenInclude(g => g.Gradedetails)
+                    .ThenInclude(g => g.GradeDetails)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Submissionid == id);
+                .FirstOrDefaultAsync(s => s.SubmissionId == id);
         }
 
         public async Task<(IReadOnlyList<Submission> Items, int Total)> GetPagedWithDetailsAsync(
@@ -42,20 +42,20 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
 
             if (filter != null)
             {
-                if (filter.Submissionid > 0)
-                    query = query.Where(s => s.Submissionid == filter.Submissionid);
+                if (filter.SubmissionId > 0)
+                    query = query.Where(s => s.SubmissionId == filter.SubmissionId);
 
-                if (filter.Studentid.HasValue)
-                    query = query.Where(s => s.Studentid == filter.Studentid);
+                if (filter.StudentId.HasValue)
+                    query = query.Where(s => s.StudentId == filter.StudentId);
 
-                if (filter.Examid.HasValue)
-                    query = query.Where(s => s.Examid == filter.Examid);
+                if (filter.ExamId.HasValue)
+                    query = query.Where(s => s.ExamId == filter.ExamId);
             }
 
             var total = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(s => s.Createat)
+                .OrderByDescending(s => s.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -69,12 +69,12 @@ namespace PRN232_GradingSystem_Repositories.Repositories.Implementations
                  .Include(s => s.Exam)
                  .Include(s => s.Student)
                  .Include(s => s.Grades)
-                     .ThenInclude(g => g.Gradedetails)
+                     .ThenInclude(g => g.GradeDetails)
                  .AsQueryable();
         }
         public async Task<bool> ExistsAsync(int submissionId)
         {
-            return await _dbContext.Submissions.AnyAsync(s => s.Submissionid == submissionId);
+            return await _dbContext.Submissions.AnyAsync(s => s.SubmissionId == submissionId);
         }
     }
 }

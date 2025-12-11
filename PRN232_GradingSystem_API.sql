@@ -1,396 +1,216 @@
--- ===== RESET GRADING DATABASE - FULL SCRIPT (pgAdmin version, UTC version) =====
+-- ================================================================
+-- PHẦN 1: CLEANUP (XÓA BẢNG CŨ ĐỂ CHẠY LẠI TỪ ĐẦU)
+-- ================================================================
+DROP TABLE IF EXISTS grade_detail CASCADE;
+DROP TABLE IF EXISTS grade CASCADE;
+DROP TABLE IF EXISTS submission CASCADE;
+DROP TABLE IF EXISTS exam CASCADE;
+DROP TABLE IF EXISTS group_student CASCADE;
+DROP TABLE IF EXISTS class_group CASCADE; -- Đổi tên từ 'Group' vì trùng keyword
+DROP TABLE IF EXISTS semester_subject CASCADE;
+DROP TABLE IF EXISTS student CASCADE;
+DROP TABLE IF EXISTS semester CASCADE;
+DROP TABLE IF EXISTS subject CASCADE;
+DROP TABLE IF EXISTS app_user CASCADE; -- Đổi tên từ 'User' vì trùng keyword
 
--- 1) Set Timezone (chỉ ảnh hưởng session, không ảnh hưởng dữ liệu UTC)
-SET TIMEZONE = 'Asia/Ho_Chi_Minh';
+-- ================================================================
+-- PHẦN 2: TẠO BẢNG (SCHEMA)
+-- ================================================================
 
--- 2) DROP TABLES in correct dependency order
-DROP TABLE IF EXISTS GradeDetail CASCADE;
-DROP TABLE IF EXISTS Grade CASCADE;
-DROP TABLE IF EXISTS Submission CASCADE;
-DROP TABLE IF EXISTS Exam CASCADE;
-DROP TABLE IF EXISTS Group_Student CASCADE;
-DROP TABLE IF EXISTS Student CASCADE;
-DROP TABLE IF EXISTS "Group" CASCADE;
-DROP TABLE IF EXISTS Semester_Subject CASCADE;
-DROP TABLE IF EXISTS Subject CASCADE;
-DROP TABLE IF EXISTS Semester CASCADE;
-DROP TABLE IF EXISTS "User" CASCADE;
-
--- ===== RECREATE ALL TABLES =====
-
-CREATE TABLE "User" (
-    UserId SERIAL PRIMARY KEY,
-    Email VARCHAR(255),
-    Username VARCHAR(100) NOT NULL,
-    Password BYTEA NOT NULL,
-    Salt BYTEA NOT NULL,
-    Role VARCHAR(50),
-    RefreshToken VARCHAR(255) NULL,
-    RefreshTokenExpiryTime TIMESTAMPTZ NULL, 
-    IsActive BOOLEAN DEFAULT TRUE,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- 1. Users (Admin, Teacher, Moderator)
+CREATE TABLE app_user (
+    user_id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    username VARCHAR(50) NOT NULL,
+    password BYTEA, -- Lưu binary password
+    salt BYTEA,
+    role VARCHAR(50), -- Admin, Teacher, Moderator, Student
+    refresh_token TEXT,
+    refresh_token_expiry_time TIMESTAMPTZ,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE Semester (
-    SemesterId SERIAL PRIMARY KEY,
-    SemesterCode VARCHAR(50) NOT NULL,
-    StartDate TIMESTAMPTZ,
-    EndDate TIMESTAMPTZ,
-    IsActive BOOLEAN DEFAULT TRUE,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UpdateAt TIMESTAMPTZ,
-    CreateBy INT REFERENCES "User"(UserId),
-    UpdateBy INT REFERENCES "User"(UserId)
+-- 2. Semester
+CREATE TABLE semester (
+    semester_id SERIAL PRIMARY KEY,
+    semester_code VARCHAR(50) NOT NULL UNIQUE, -- SU24, FA24
+    start_date TIMESTAMPTZ,
+    end_date TIMESTAMPTZ,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ,
+    created_by INT REFERENCES app_user(user_id),
+    updated_by INT REFERENCES app_user(user_id)
 );
 
-CREATE TABLE Subject (
-    SubjectId SERIAL PRIMARY KEY,
-    SubjectName VARCHAR(255) NOT NULL,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- 3. Subject
+CREATE TABLE subject (
+    subject_id SERIAL PRIMARY KEY,
+    subject_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE Semester_Subject (
-    SemesterId INT REFERENCES Semester(SemesterId) ON DELETE CASCADE,
-    SubjectId INT REFERENCES Subject(SubjectId) ON DELETE CASCADE,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (SemesterId, SubjectId)
+-- 4. Semester_Subject (Many-to-Many)
+CREATE TABLE semester_subject (
+    semester_id INT REFERENCES semester(semester_id),
+    subject_id INT REFERENCES subject(subject_id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (semester_id, subject_id)
 );
 
-CREATE TABLE "Group" (
-    GroupId SERIAL PRIMARY KEY,
-    GroupName VARCHAR(255) NOT NULL,
-    SemesterId INT REFERENCES Semester(SemesterId) ON DELETE CASCADE,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UpdateAt TIMESTAMPTZ,
-    CreateBy INT REFERENCES "User"(UserId),
-    UpdateBy INT REFERENCES "User"(UserId)
+-- 5. Class Group (Lớp học)
+CREATE TABLE class_group (
+    group_id SERIAL PRIMARY KEY,
+    group_name VARCHAR(50) NOT NULL,
+    semester_id INT REFERENCES semester(semester_id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ,
+    created_by INT REFERENCES app_user(user_id),
+    updated_by INT REFERENCES app_user(user_id)
 );
 
-CREATE TABLE Student (
-    StudentId SERIAL PRIMARY KEY,
-    StudentFullName VARCHAR(255),
-    StudentRoll VARCHAR(50),
-    IsActive BOOLEAN DEFAULT TRUE,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- 6. Student
+CREATE TABLE student (
+    student_id SERIAL PRIMARY KEY,
+    student_fullname VARCHAR(100),
+    student_roll VARCHAR(20) NOT NULL UNIQUE, -- HE150001
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE Group_Student (
-    GroupId INT REFERENCES "Group"(GroupId) ON DELETE CASCADE,
-    StudentId INT REFERENCES Student(StudentId) ON DELETE CASCADE,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (GroupId, StudentId)
+-- 7. Group_Student
+CREATE TABLE group_student (
+    group_id INT REFERENCES class_group(group_id),
+    student_id INT REFERENCES student(student_id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (group_id, student_id)
 );
 
-CREATE TABLE Exam (
-    ExamId SERIAL PRIMARY KEY,
-    SemesterId INT REFERENCES Semester(SemesterId) ON DELETE CASCADE,
-    SubjectId INT REFERENCES Subject(SubjectId) ON DELETE CASCADE,
-    ExamName VARCHAR(255),
-    ExamDate TIMESTAMPTZ,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+-- 8. Exam
+CREATE TABLE exam (
+    exam_id SERIAL PRIMARY KEY,
+    semester_id INT REFERENCES semester(semester_id),
+    subject_id INT REFERENCES subject(subject_id),
+    exam_name VARCHAR(255),
+    exam_date TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE Submission (
-    SubmissionId SERIAL PRIMARY KEY,
-    ExamId INT REFERENCES Exam(ExamId) ON DELETE CASCADE,
-    StudentId INT REFERENCES Student(StudentId) ON DELETE CASCADE,
-    Solution TEXT,
-    Comment TEXT,
-    FileUrl VARCHAR(255),
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UpdateAt TIMESTAMPTZ
+-- 9. Submission
+CREATE TABLE submission (
+    submission_id SERIAL PRIMARY KEY,
+    exam_id INT REFERENCES exam(exam_id),
+    student_id INT REFERENCES student(student_id),
+    solution TEXT,
+    comment TEXT,
+    file_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ
 );
 
-CREATE TABLE Grade (
-    GradeId SERIAL PRIMARY KEY,
-    SubmissionId INT REFERENCES Submission(SubmissionId) ON DELETE CASCADE,
-    Q1 NUMERIC(5,2),
-    Q2 NUMERIC(5,2),
-    Q3 NUMERIC(5,2),
-    Q4 NUMERIC(5,2),
-    Q5 NUMERIC(5,2),
-    Q6 NUMERIC(5,2),
-    TotalScore NUMERIC(6,2),
-    Status VARCHAR(50),
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UpdateAt TIMESTAMPTZ,
-    Marker INT REFERENCES "User"(UserId)
+-- 10. Grade (QUAN TRỌNG NHẤT)
+CREATE TABLE grade (
+    grade_id SERIAL PRIMARY KEY,
+    submission_id INT REFERENCES submission(submission_id),
+    
+    -- Các cột điểm cứng của hệ thống cũ
+    q1 NUMERIC(5,2),
+    q2 NUMERIC(5,2),
+    q3 NUMERIC(5,2),
+    q4 NUMERIC(5,2),
+    q5 NUMERIC(5,2),
+    q6 NUMERIC(5,2),
+    total_score NUMERIC(5,2),
+    
+    status VARCHAR(50), -- TeacherVerified, ModeratorApproved
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ,
+    marker_id INT REFERENCES app_user(user_id),
+
+    -- CỘT MỚI CHO MODERATOR
+    grade_count INT DEFAULT 1,     -- 1: Teacher chấm, 2: Moderator chấm
+    plagiarism_score NUMERIC(5,2)  -- 0 -> 100%
 );
 
-
-CREATE TABLE GradeDetail (
-    GradeDetailId SERIAL PRIMARY KEY,
-    GradeId INT REFERENCES Grade(GradeId) ON DELETE CASCADE,
-    QCode VARCHAR(50),
-    SubCode VARCHAR(255),
-    Point NUMERIC(5,2),
-    Note TEXT,
-    CreateAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UpdateAt TIMESTAMPTZ
+-- 11. GradeDetail
+CREATE TABLE grade_detail (
+    grade_detail_id SERIAL PRIMARY KEY,
+    grade_id INT REFERENCES grade(grade_id),
+    q_code VARCHAR(10), -- Q1, Q2
+    sub_code VARCHAR(50), -- Login, CRUD
+    point NUMERIC(5,2),
+    note TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ
 );
 
+-- ================================================================
+-- PHẦN 3: SEED DATA (DỮ LIỆU MẪU)
+-- ================================================================
 
--- ===== SAMPLE DATA =====
+-- 1. Tạo Users
+INSERT INTO app_user (email, username, role, is_active) VALUES
+('admin@fpt.edu.vn', 'admin', 'Admin', true),
+('teacher@fpt.edu.vn', 'teacher', 'Teacher', true),     -- ID 2
+('moderator@fpt.edu.vn', 'mod', 'Moderator', true);      -- ID 3
 
--- 1) Users
-INSERT INTO "User" (Email, Username, Password, Salt, Role)
-VALUES
-('admin@gmail.com', 'admin', 'c73e4eba5702ded60e366c5eef05f3639f0e67c51122b0c114ef9506d18c5a8600148ce8814745c3613705f705f4d7ec850650209cfed023b078188e5130b797', '47291abfc98bb8d7ec343f784b5c3201337f358a789d7f5c5636e825b3e7a8c47e6abce51e1d6bcb68347d4ffd270bb97fb9e58af9303a0f96aed7fd96ca7735dbebc40e7ceda806599fbe85689811d84d9147ca7f3e47c42837015cca5b2eba8853fdfb63136338c61b566ec8fcc913137bb4d4c51f05e6a1c59b1d6dba5e42', 'Admin'),
-('manager@gmail.com', 'manager', 'dd41d0ea83f4e66f20c1dfb810b5d3381aacee098dd4aafb1a80b34287b166370587600aa372b4baafb70d61b23ce86083a12cf9e55e60a82fb6074f86a94123', 'c4f76cf3254c9f4cebc7bb08ff8abaf74bb1fe1b08df5fe5aee001103bbebcb750b2b4408430e16344a40b4517b60bc22be411aaf623cc797feac8563f5dc49127b1b8c14dee82fd18700ce4d91db7fbd5fb61757365c4788c620fe59c60da484bc96fa108da8b7fb8369d599b5346a671659d9874c065aaed23a8adf1aab583', 'Manager'),
-('moderator@gmail.com', 'moderator', 'c73e4eba5702ded60e366c5eef05f3639f0e67c51122b0c114ef9506d18c5a8600148ce8814745c3613705f705f4d7ec850650209cfed023b078188e5130b797', '47291abfc98bb8d7ec343f784b5c3201337f358a789d7f5c5636e825b3e7a8c47e6abce51e1d6bcb68347d4ffd270bb97fb9e58af9303a0f96aed7fd96ca7735dbebc40e7ceda806599fbe85689811d84d9147ca7f3e47c42837015cca5b2eba8853fdfb63136338c61b566ec8fcc913137bb4d4c51f05e6a1c59b1d6dba5e42', 'Moderator'),
-('vulns@gmail.com', 'vulns', '609a322daf0500f7bd4673ccda0635825e544c09ad10ac681645b7f8dacf398e5f17c61f95b2fe2e16172fb218e5d844f7533b3371e58999ebdd638419b481eb', '7301c8128b2f7eeb6f0ea1e224acb0d732ef49c896aac413440e4f16208135cb69e9939fc84230875b3035509bab78e8e2ef32076763c27429fa7e352f2f922ee8f7634b51c6a89d67f10cbf4f0f7058e3a5f14c4b8c221a45f287871bd7488990aa037207f34cee804640f59b12142a13c044b287eeac9d935304ad5d1ec48a', 'Examiner');
+-- 2. Tạo Semester & Subject
+INSERT INTO semester (semester_code, start_date, end_date, created_by) 
+VALUES ('SU24', '2024-05-01', '2024-08-31', 2);
 
--- 2) Semesters
-INSERT INTO Semester (SemesterCode, StartDate, EndDate, IsActive, CreateBy)
-VALUES
-('SU25','2025-05-12','2025-09-06', TRUE, 1);
+INSERT INTO subject (subject_name) VALUES ('PRN232');
 
+INSERT INTO semester_subject (semester_id, subject_id) VALUES (1, 1);
 
--- 3) Subjects
-INSERT INTO Subject (SubjectName)
-VALUES
-('PRN222');
+-- 3. Tạo Class Group
+INSERT INTO class_group (group_name, semester_id, created_by) VALUES ('SE1601', 1, 2);
 
--- 4) Semester_Subject
-INSERT INTO Semester_Subject (SemesterId, SubjectId)
-VALUES
-(1, 1);
+-- 4. Tạo Students
+INSERT INTO student (student_fullname, student_roll) VALUES
+('Nguyen Van A', 'HE150001'), -- Case 1: Bình thường
+('Tran Van B', 'HE150002'),   -- Case 2: Đạo văn
+('Le Thi C', 'HE150003');     -- Case 3: Đã Review
 
--- 5) Groups
-INSERT INTO "Group" (GroupName, SemesterId, CreateBy)
-VALUES
-('SE1704', 1, 1),
-('SE1707', 1, 1),
-('SE1712', 1, 1);
+INSERT INTO group_student (group_id, student_id) VALUES (1, 1), (1, 2), (1, 3);
 
--- 6) Students
--- Map Groups: SE1704=1, SE1707=2, SE1712=3
-INSERT INTO Student (StudentFullName, StudentRoll)
-VALUES
-('Đỗ Long Ánh', 'SE181818'),
-('Nguyễn Hoàng Mai Anh', 'SE181874'),
-('Nguyễn Anh', 'SE171217'),
-('Phạm Thị Hải Anh', 'SE171207'),
-('Hoàng Quốc An', 'SE181520'),
-('Trần Tuấn Anh', 'SE172616'),
-('Lê Quang An', 'SE150619'),
-('Trần Vĩnh An', 'SE184967'),
-('Quách Gia Bảo', 'SE180449'),
-('Nguyễn Phạm Thanh Bình', 'SE181532'),
-('Nguyễn Thanh Bình', 'SE181790'),
-('Nguyễn Phú Cường', 'SE173621'),
-('Lại Vũ Hải Đăng', 'SE151369'),
-('Phạm Thế Danh', 'SE184514'),
-('Phạm Thị Anh Đào', 'SE181924'),
-('Nguyễn Quốc Đạt', 'SE184502'),
-('Vũ Minh Đạt', 'SE184665'),
-('Phan Thanh Đức', 'SE150708'),
-('Trịnh Hải Đức', 'SE184622'),
-('Nguyễn Mạnh Dưỡng', 'SE181515'),
-('Phan Khánh Dương', 'SE180524'),
-('Nguyễn Thái Duy', 'SE170601'),
-('Trần Hạ Khương Duy', 'QE180075'),
-('Trần Thiện Duy', 'SE184596'),
-('Phan Hoàng Ngọc Hân', 'SE184307'),
-('Vũ Đậu Thành Hoàng', 'SE160556'),
-('Nguyễn Huy Thiên Hòa', 'SE185071'),
-('Nguyễn Hàng Nhật Huy', 'SE170046'),
-('Nguyễn Quang Huy', 'SE181563'),
-('Lê Tuấn Khanh', 'SE184638'),
-('Trần Nam Khánh', 'SE184544'),
-('Nguyễn Văn Duy Khiêm', 'SE180168'),
-('Lê Trung Anh Khôi', 'SE180591'),
-('Nguyễn Lâm Minh Khôi', 'SE182845'),
-('Phạm Minh Khôi', 'SE171989'),
-('Nguyễn Trung Kiên', 'SE170416'),
-('Lu Tử Kiệt', 'SE184654'),
-('Trần Gia Kiệt', 'SE180500'),
-('Trương Tuấn Kiệt', 'SE185063'),
-('Trần Văn Lâm', 'SE173173'),
-('Nguyễn Trình Cát Linh', 'SE181858'),
-('Võ Gia Linh', 'SE181523'),
-('Lê Hồ Hoàng Long', 'SE181754'),
-('Nguyễn Hoàng Long', 'SE172340'),
-('Nguyễn Hoàng Long', 'SE172388'),
-('Nguyễn Phi Long', 'SE181672'),
-('Trương Nguyễn Hoàng Long', 'SE173174'),
-('Lý Hải Luân', 'SE172597'),
-('Dương Đức Mạnh', 'SE173244'),
-('Nguyễn Đức Mạnh', 'SE184730'),
-('Nguyễn Khánh Minh', 'SE180188'),
-('Nguyễn Lê Minh', 'SE183360'),
-('Nguyễn Quang Minh', 'SE184796'),
-('Trần Hoàng Nhật Minh', 'SE180461'),
-('Mai Hải Nam', 'SE184557'),
-('Nguyễn Đặng Phương Nam', 'SE171442'),
-('Nguyễn Hiền Trung Nam', 'SE183876'),
-('Nguyễn Thành Nam', 'SE170239'),
-('Phan Thành Nam', 'SE180525'),
-('Trương Lê Minh Nghĩa', 'QE170244'),
-('Trần Đình Nguyên', 'SE172654'),
-('Trần Phạm Thảo Nguyên', 'SE180486'),
-('Nguyễn Phúc Nhân', 'SE184696'),
-('Cao Hoàng Nhật', 'SE184713'),
-('Huỳnh Trung Nhiên', 'SE173168'),
-('Hỷ Minh Phát', 'SE184629'),
-('Tăng Phát', 'SE181923'),
-('Đặng Nhật Phi', 'SE171156'),
-('Hoàng Gia Phong', 'SE180543'),
-('Nguyễn Thanh Phong', 'SE181770'),
-('Nguyễn Anh Quân', 'SE180619'),
-('Lê Quang Thái Sơn', 'SE184097'),
-('Bùi Minh Thắng', 'SE180564'),
-('Nguyễn Thanh Thắng', 'SE170073'),
-('Nguyễn Xuân Thắng', 'SE184639'),
-('Trần Nhật Thắng', 'QE180046'),
-('Nguyễn Trí Hoàng Thân', 'SE183895'),
-('Đinh Lê Thịnh', 'SE181755'),
-('Đỗ Trường Thịnh', 'SE183642'),
-('Nguyễn Đức Thịnh', 'SE184492'),
-('Nguyễn Phong Thịnh', 'SE172990'),
-('Trần Đình Thịnh', 'SE181531'),
-('Phạm Nhất Thống', 'SE184826'),
-('Nguyễn Thái Thuận', 'SE171716'),
-('Trần Chí Thuận', 'SE184519'),
-('Hoàng Ngọc Tiến', 'SE181783'),
-('Nguyễn Ngọc Tiến', 'SE181773'),
-('Lê Hữu Thành Tín', 'SE180481'),
-('Nguyễn Ngọc Toàn', 'SE171130'),
-('Trần Thị Thanh Trang', 'SE180491'),
-('Nguyễn Cao Trí', 'SE181729'),
-('Nguyễn Thanh Trí', 'SE182028'),
-('Hoàng Chí Trung', 'SE181597'),
-('Lê Trung', 'SE173223'),
-('Mai Tiến Trung', 'SE172199'),
-('Nguyễn Minh Trung', 'SE184811'),
-('Nguyễn Nhật Trường', 'SE184834'),
-('Phạm Minh Trường', 'SE182027'),
-('Nguyễn Anh Tuấn', 'SE172510'),
-('Nguyễn Văn Triệu Tuấn', 'SE161029'),
-('Nguyễn Việt', 'SE180672'),
-('Nguyễn Đức Hoàng Vũ', 'SE181551'),
-('Trương Tuấn Vũ', 'SE184370'),
-('Nguyễn Tuấn Lộc', 'SE160990'),
-('Nguyễn Mai Thành Nam', 'SE170240'),
-('Phạm Đình Quốc Thịnh', 'SE171589');
+-- 5. Tạo Exam
+INSERT INTO exam (semester_id, subject_id, exam_name, exam_date) 
+VALUES (1, 1, 'PRN232 Final Exam', NOW());
+
+-- 6. TẠO SUBMISSION & GRADE (3 TÌNH HUỐNG CHO MODERATOR)
+
+-- CASE 1: Bài cần Review (TeacherVerified, GradeCount = 1)
+INSERT INTO submission (exam_id, student_id, file_url) VALUES (1, 1, 'https://cloud.../sv1.zip');
+-- Insert Grade
+INSERT INTO grade (submission_id, q1, total_score, status, marker_id, grade_count, plagiarism_score)
+VALUES (1, 1.0, 8.0, 'TeacherVerified', 2, 1, 0.0);
+-- Insert Detail
+INSERT INTO grade_detail (grade_id, q_code, sub_code, point, note) 
+VALUES (1, 'Q1', 'Login', 1.0, 'Good');
 
 
-
--- 7) Group_Student
--- SE1712 = 3
-INSERT INTO Group_Student (GroupId, StudentId)
-VALUES
-(3, 1),
-(3, 7),
-(3, 8),
-(3, 12),
-(3, 13),
-(3, 16),
-(3, 17),
-(3, 18),
-(3, 19),
-(3, 23),
-(3, 27),
-(3, 30),
-(3, 33),
-(3, 34),
-(3, 37),
-(3, 49),
-(3, 50),
-(3, 51),
-(3, 53),
-(3, 55),
-(3, 57),
-(3, 59),
-(3, 60),
-(3, 63),
-(3, 64),
-(3, 65),
-(3, 66),
-(3, 72),
-(3, 75),
-(3, 83),
-(3, 97),
-(3, 99),
-(3, 100),
-(3, 103),
-(3, 106);
-
--- SE1707 = 2
-INSERT INTO Group_Student (GroupId, StudentId)
-VALUES
-(2, 2),
-(2, 5),
-(2, 9),
-(2, 10),
-(2, 11),
-(2, 20),
-(2, 21),
-(2, 29),
-(2, 32),
-(2, 38),
-(2, 41),
-(2, 42),
-(2, 43),
-(2, 46),
-(2, 54),
-(2, 67),
-(2, 70),
-(2, 71),
-(2, 73),
-(2, 76),
-(2, 78),
-(2, 79),
-(2, 82),
-(2, 86),
-(2, 87),
-(2, 88),
-(2, 90),
-(2, 91),
-(2, 92),
-(2, 93),
-(2, 101),
-(2, 102);
-
--- SE1704 = 1
-INSERT INTO Group_Student (GroupId, StudentId)
-VALUES
-(1, 3),
-(1, 4),
-(1, 6),
-(1, 14),
-(1, 22),
-(1, 24),
-(1, 25),
-(1, 26),
-(1, 28),
-(1, 31),
-(1, 35),
-(1, 36),
-(1, 40),
-(1, 44),
-(1, 45),
-(1, 47),
-(1, 48),
-(1, 52),
-(1, 56),
-(1, 58),
-(1, 61),
-(1, 64),
-(1, 74),
-(1, 77),
-(1, 89),
-(1, 94),
-(1, 95),
-(1, 96),
-(1, 98),
-(1, 104),
-(1, 105);
+-- CASE 2: Bài nghi vấn Đạo văn (PlagiarismScore = 90%)
+INSERT INTO submission (exam_id, student_id, file_url) VALUES (1, 2, 'https://cloud.../sv2.zip');
+-- Insert Grade
+INSERT INTO grade (submission_id, q1, total_score, status, marker_id, grade_count, plagiarism_score)
+VALUES (2, 1.0, 9.0, 'TeacherVerified', 2, 1, 90.5); -- 90.5% đạo văn
+-- Insert Detail
+INSERT INTO grade_detail (grade_id, q_code, sub_code, point, note) 
+VALUES (2, 'Q1', 'Login', 1.0, 'Code looks suspicious');
 
 
+-- CASE 3: Bài ĐÃ Review xong (ModeratorApproved, GradeCount = 2)
+INSERT INTO submission (exam_id, student_id, file_url) VALUES (1, 3, 'https://cloud.../sv3.zip');
+-- Insert Grade (ID = 3)
+INSERT INTO grade (submission_id, q1, total_score, status, marker_id, grade_count, plagiarism_score)
+VALUES (3, 0.5, 7.5, 'ModeratorApproved', 3, 2, 5.0); -- GradeCount = 2, Marker = Moderator (ID 3)
+-- Insert Detail
+INSERT INTO grade_detail (grade_id, q_code, sub_code, point, note) 
+VALUES (3, 'Q1', 'Login', 0.5, 'Moderator: Logic sai phần validate');
 
--- 8) Exams
-INSERT INTO Exam (SemesterId, SubjectId, ExamName, ExamDate)
-VALUES
-(1, 1, 'PE_PRN222_SU25_332278', '2025-08-30');
-
+-- Kiểm tra kết quả
+SELECT g.grade_id, s.student_roll, g.status, g.grade_count, g.plagiarism_score 
+FROM grade g 
+JOIN submission sub ON g.submission_id = sub.submission_id
+JOIN student s ON sub.student_id = s.student_id;

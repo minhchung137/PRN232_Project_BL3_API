@@ -30,9 +30,9 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var repositoryFilter = new Submission
             {
-                Submissionid = filter?.Submissionid ?? 0,
-                Examid = filter?.Examid,
-                Studentid = filter?.Studentid
+                SubmissionId = filter?.Submissionid ?? 0,
+                ExamId = filter?.Examid,
+                StudentId = filter?.Studentid
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);
@@ -62,16 +62,16 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
         {
             var repo = UnitOfWork.SubmissionRepository;
             var existing = repo.GetAllWithDetails()
-                .FirstOrDefault(s => s.Examid == examId && s.Studentid == studentId);
+                .FirstOrDefault(s => s.ExamId == examId && s.StudentId == studentId);
 
             if (existing != null)
             {
                 bool needsUpdate = false;
                 
                 // Update FileUrl if provided
-                if (!string.IsNullOrWhiteSpace(fileUrl) && existing.Fileurl != fileUrl)
+                if (!string.IsNullOrWhiteSpace(fileUrl) && existing.FileUrl != fileUrl)
                 {
-                    existing.Fileurl = fileUrl;
+                    existing.FileUrl = fileUrl;
                     needsUpdate = true;
                 }
                 
@@ -84,7 +84,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 
                 if (needsUpdate)
                 {
-                    existing.Updateat = DateTime.UtcNow;
+                    existing.UpdatedAt = DateTime.UtcNow;
                     repo.Update(existing);
                     await UnitOfWork.SaveChangesAsync();
                 }
@@ -134,9 +134,9 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 throw new ValidationException("Comment cannot exceed 1000 characters.");
 
             var entity = _mapper.Map<Submission>(model);
-            entity.Createat = DateTime.UtcNow;
-            entity.Updateat = null;
-            entity.Submissionid = 0;
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = null;
+            entity.SubmissionId = 0;
 
             await submissionRepo.AddAsync(entity);
             await UnitOfWork.SaveChangesAsync();
@@ -159,7 +159,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 var examExists = await examRepo.ExistsAsync(model.Examid.Value);
                 if (!examExists)
                     throw new NotFoundException($"Exam with ID '{model.Examid}' does not exist.");
-                existing.Examid = model.Examid;
+                existing.ExamId = model.Examid;
             }
 
             if (model.Studentid.HasValue)
@@ -167,7 +167,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 var studentExists = await studentRepo.ExistsAsync(model.Studentid.Value);
                 if (!studentExists)
                     throw new NotFoundException($"Student with ID '{model.Studentid}' does not exist.");
-                existing.Studentid = model.Studentid;
+                existing.StudentId = model.Studentid;
             }
 
             if (!string.IsNullOrWhiteSpace(model.Solution))
@@ -185,9 +185,9 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             }
 
             if (!string.IsNullOrWhiteSpace(model.Fileurl))
-                existing.Fileurl = model.Fileurl;
+                existing.FileUrl = model.Fileurl;
 
-            existing.Updateat = DateTime.UtcNow;
+            existing.UpdatedAt = DateTime.UtcNow;
 
             submissionRepo.Update(existing);
             await UnitOfWork.SaveChangesAsync();

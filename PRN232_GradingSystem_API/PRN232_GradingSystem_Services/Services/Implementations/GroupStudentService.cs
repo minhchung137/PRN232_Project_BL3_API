@@ -26,8 +26,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var repositoryFilter = new GroupStudent
             {
-                Groupid = filter?.Groupid ?? 0,
-                Studentid = filter?.Studentid ?? 0
+                GroupId = filter?.Groupid ?? 0,
+                StudentId = filter?.Studentid ?? 0
             };
 
             var (entities, total) = await repo.GetPagedWithDetailsAsync(repositoryFilter, pageNumber, pageSize);
@@ -75,7 +75,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             // ===== MAP & SAVE =====
             var entity = _mapper.Map<GroupStudent>(model);
-            entity.Createat = DateTime.UtcNow;
+            entity.CreatedAt = DateTime.UtcNow;
 
             await repo.AddAsync(entity);
             await UnitOfWork.SaveChangesAsync();

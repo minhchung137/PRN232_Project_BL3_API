@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace PRN232_GradingSystem_Repositories.Repositories.Interfaces
 {
-    public interface IGroupRepository : IEntityRepository<Group>
+    public interface IGroupRepository : IEntityRepository<ClassGroup>
     {
-        Task<(IReadOnlyList<Group> Items, int Total)> GetPagedWithDetailsAsync(Group filter, int pageNumber, int pageSize);
-        IQueryable<Group> GetAllWithDetails();
+        Task<(IReadOnlyList<ClassGroup> Items, int Total)> GetPagedWithDetailsAsync(ClassGroup filter, int pageNumber, int pageSize);
+        IQueryable<ClassGroup> GetAllWithDetails();
         Task<bool> ExistsWithNameAsync(string groupName, int semesterId, int excludeId = 0);
     }
 }

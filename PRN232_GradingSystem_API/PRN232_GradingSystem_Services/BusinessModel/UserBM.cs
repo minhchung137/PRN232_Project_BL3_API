@@ -16,8 +16,8 @@ namespace PRN232_GradingSystem_Services.BusinessModel
         public DateTime? Createat { get; set; }
 
         public IReadOnlyList<Grade> Grades { get; set; }
-        public IReadOnlyList<Group> GroupCreatebyNavigations { get; set; }
-        public IReadOnlyList<Group> GroupUpdatebyNavigations { get; set; }
+        public IReadOnlyList<ClassGroup> GroupCreatebyNavigations { get; set; }
+        public IReadOnlyList<ClassGroup> GroupUpdatebyNavigations { get; set; }
         public IReadOnlyList<Semester> SemesterCreatebyNavigations { get; set; }
         public IReadOnlyList<Semester> SemesterUpdatebyNavigations { get; set; }
 

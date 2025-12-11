@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace PRN232_GradingSystem_Repositories.Repositories.Interfaces
 {
-    public interface IUserRepository : IEntityRepository<User>
+    public interface IUserRepository : IEntityRepository<AppUser>
     {
-        Task<(IReadOnlyList<User> Items, int Total)> GetPagedWithDetailsAsync(User filter, int pageNumber, int pageSize);
+        Task<(IReadOnlyList<AppUser> Items, int Total)> GetPagedWithDetailsAsync(AppUser filter, int pageNumber, int pageSize);
 
-        Task<User> GetByUsernameAsync(string username);
-        Task<User> GetByEmailAsync(string email);
-        Task<User> GetByRefreshTokenAsync(string refreshToken);
-        IQueryable<User> GetAllWithDetails();
+        Task<AppUser> GetByUsernameAsync(string username);
+        Task<AppUser> GetByEmailAsync(string email);
+        Task<AppUser> GetByRefreshTokenAsync(string refreshToken);
+        IQueryable<AppUser> GetAllWithDetails();
 
         Task<bool> ExistsAsync(int userId);
         Task<int?> GetUserIdByEmailAsync(string email);
