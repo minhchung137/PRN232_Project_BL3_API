@@ -29,6 +29,8 @@ public partial class Exam
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
 
+    public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
+    
     [ForeignKey("SemesterId")]
     [InverseProperty("Exams")]
     public virtual Semester? Semester { get; set; }

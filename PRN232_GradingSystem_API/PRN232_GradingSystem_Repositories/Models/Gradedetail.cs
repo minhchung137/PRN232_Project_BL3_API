@@ -16,16 +16,16 @@ public partial class GradeDetail
     [Column("grade_id")]
     public int? GradeId { get; set; }
 
-    [Column("q_code")]
-    [StringLength(10)]
+    [Column("criteria_id")]
+    public int? CriteriaId { get; set; }  
+
+    [Column("q_code"), MaxLength(10)]
     public string? QCode { get; set; }
 
-    [Column("sub_code")]
-    [StringLength(50)]
+    [Column("sub_code"), MaxLength(50)]
     public string? SubCode { get; set; }
 
-    [Column("point")]
-    [Precision(5, 2)]
+    [Column("point", TypeName = "numeric(5,2)")]
     public decimal? Point { get; set; }
 
     [Column("note")]
@@ -37,7 +37,9 @@ public partial class GradeDetail
     [Column("updated_at")]
     public DateTime? UpdatedAt { get; set; }
 
-    [ForeignKey("GradeId")]
-    [InverseProperty("GradeDetails")]
+    [ForeignKey(nameof(CriteriaId))]
+    public virtual Criterion? Criteria { get; set; }
+
+    [ForeignKey(nameof(GradeId))]
     public virtual Grade? Grade { get; set; }
 }
