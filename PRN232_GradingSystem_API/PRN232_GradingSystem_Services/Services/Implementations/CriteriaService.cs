@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRN232_GradingSystem_Repositories.Models;
 using PRN232_GradingSystem_Repositories.UnitOfWork;
 using PRN232_GradingSystem_Services.BusinessModel;
