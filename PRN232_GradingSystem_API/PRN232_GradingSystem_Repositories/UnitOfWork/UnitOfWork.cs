@@ -26,6 +26,9 @@ namespace PRN232_GradingSystem_Repositories.UnitOfWork
         private ISubmissionRepository _submissionRepository;
         private IUserRepository _userRepository;
 
+        private IQuestionRepository _questionRepository;
+        private ICriteriaRepository _criteriaRepository;
+        
         public UnitOfWork(PRN232_GradingSystem_APIContext dbContext)
         {
             _dbContext = dbContext;
@@ -60,6 +63,12 @@ namespace PRN232_GradingSystem_Repositories.UnitOfWork
         public ISubmissionRepository SubmissionRepository => _submissionRepository ??= new SubmissionRepository(_dbContext);
         public IUserRepository UserRepository => _userRepository ??= new UserRepository(_dbContext);
 
+        public IQuestionRepository QuestionRepository
+            => _questionRepository ??= new QuestionRepository(_dbContext);
+
+        public ICriteriaRepository CriteriaRepository
+            => _criteriaRepository ??= new CriteriaRepository(_dbContext);
+        
         public Task<int> SaveChangesAsync()
         {
             return _dbContext.SaveChangesAsync();

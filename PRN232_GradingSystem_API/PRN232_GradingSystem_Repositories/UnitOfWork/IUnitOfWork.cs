@@ -24,6 +24,9 @@ namespace PRN232_GradingSystem_Repositories.UnitOfWork
         ISubmissionRepository SubmissionRepository { get; }
         IUserRepository UserRepository { get; }
 
+        IQuestionRepository QuestionRepository { get; }
+        ICriteriaRepository CriteriaRepository { get; }
+        
         Task<int> SaveChangesAsync();
     }
 }

@@ -16,6 +16,8 @@ public partial class GradeDetail
     [Column("grade_id")]
     public int? GradeId { get; set; }
 
+    public int? CriteriaId { get; set; }
+    
     [Column("q_code")]
     [StringLength(10)]
     public string? QCode { get; set; }
@@ -37,6 +39,8 @@ public partial class GradeDetail
     [Column("updated_at")]
     public DateTime? UpdatedAt { get; set; }
 
+    public virtual Criterion? Criteria { get; set; }
+    
     [ForeignKey("GradeId")]
     [InverseProperty("GradeDetails")]
     public virtual Grade? Grade { get; set; }

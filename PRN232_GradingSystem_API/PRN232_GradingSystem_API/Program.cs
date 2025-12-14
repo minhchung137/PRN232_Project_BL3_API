@@ -126,6 +126,9 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IExamExportService, ExamExportService>();
 builder.Services.AddScoped<IExamRepository, ExamRepository>();
 
+builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<ICriteriaService, CriteriaService>();
+
 // JWT & Auth
 builder.Services.AddSingleton<PRN232.Lab2.CoffeeStore.Services.Helpers.JwtHelper>();
 
