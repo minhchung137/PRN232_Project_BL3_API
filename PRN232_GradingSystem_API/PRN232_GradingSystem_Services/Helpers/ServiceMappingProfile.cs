@@ -114,6 +114,27 @@ namespace PRN232_GradingSystem_Services.Helpers
                 .ReverseMap()
                 .ForMember(dest => dest.Submissions, opt => opt.Ignore())
                 .ForMember(dest => dest.GroupStudents, opt => opt.Ignore());
+            
+            // 12. MAPPING QUESTION
+            CreateMap<Question, QuestionBM>()
+                .ForMember(dest => dest.Questionid, opt => opt.MapFrom(src => src.QuestionId))
+                .ForMember(dest => dest.Examid, opt => opt.MapFrom(src => src.ExamId))
+                .ForMember(dest => dest.Qcode, opt => opt.MapFrom(src => src.QCode))
+                .ForMember(dest => dest.Maxscore, opt => opt.MapFrom(src => src.MaxScore))
+                .ReverseMap()
+                .ForMember(dest => dest.Exam, opt => opt.Ignore())          // tránh vòng lặp (nếu có nav)
+                .ForMember(dest => dest.Criteria, opt => opt.Ignore());     // nếu Question có ICollection<Criterion>
+
+            // 13. MAPPING CRITERIA (Entity là Criterion)
+            CreateMap<Criterion, CriteriaBM>()
+                .ForMember(dest => dest.Criteriaid, opt => opt.MapFrom(src => src.CriteriaId))
+                .ForMember(dest => dest.Questionid, opt => opt.MapFrom(src => src.QuestionId))
+                .ForMember(dest => dest.Ismanual, opt => opt.MapFrom(src => src.IsManual))
+                .ForMember(dest => dest.Orderindex, opt => opt.MapFrom(src => src.OrderIndex))
+                .ReverseMap()
+                .ForMember(dest => dest.Question, opt => opt.Ignore())      // tránh vòng lặp (nếu có nav)
+                .ForMember(dest => dest.GradeDetails, opt => opt.Ignore());
+            
         }
     }
 }
