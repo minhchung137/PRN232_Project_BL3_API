@@ -23,6 +23,8 @@ namespace PRN232_GradingSystem_API.Mapping
             CreateMap<SubjectBM, SubjectResponse>();
             CreateMap<SubmissionBM, SubmissionResponse>();
             CreateMap<ExamBM, ExamResponse>();
+            CreateMap<QuestionBM, QuestionResponse>();
+            CreateMap<CriteriaBM, CriteriaResponse>();
 
             // ================== Request -> BM ==================
             CreateMap<UserRequest, UserBM>();
@@ -62,12 +64,31 @@ namespace PRN232_GradingSystem_API.Mapping
             CreateMap<GroupStudentRequest, GroupStudentBM>()
     .ForMember(dest => dest.Group, opt => opt.Ignore())
     .ForMember(dest => dest.Student, opt => opt.Ignore());
+            
+            // Question
+            CreateMap<QuestionFilterRequest, QuestionBM>();
+            CreateMap<QuestionRequest, QuestionBM>()
+                .ForMember(dest => dest.Questionid, opt => opt.Ignore()); 
+
+            CreateMap<QuestionUpdateRequest, QuestionBM>()
+                .ForMember(dest => dest.Questionid, opt => opt.Ignore())
+                .ForMember(dest => dest.Examid, opt => opt.Ignore()); 
+
+            // Criteria
+            CreateMap<CriteriaFilterRequest, CriteriaBM>();
+            CreateMap<CriteriaRequest, CriteriaBM>()
+                .ForMember(dest => dest.Criteriaid, opt => opt.Ignore()); 
+
+            CreateMap<CriteriaUpdateRequest, CriteriaBM>()
+                .ForMember(dest => dest.Criteriaid, opt => opt.Ignore())
+                .ForMember(dest => dest.Questionid, opt => opt.Ignore());
+            
 
             CreateMap<SemesterFilterRequest, SemesterBM>();
             // Map khi tạo mới Semester
             CreateMap<SemesterCreateRequest, SemesterBM>()
                 .ForMember(dest => dest.Createat, opt => opt.MapFrom(_ => DateTime.UtcNow))
-                .ForMember(dest => dest.Updateat, opt => opt.Ignore()) // chưa có
+                .ForMember(dest => dest.Updateat, opt => opt.Ignore()) 
                 .ForMember(dest => dest.Semesterid, opt => opt.Ignore())
                 .ForMember(dest => dest.Exams, opt => opt.Ignore())
                 .ForMember(dest => dest.Groups, opt => opt.Ignore())
@@ -78,7 +99,7 @@ namespace PRN232_GradingSystem_API.Mapping
                     .ForMember(dest => dest.Semesterid, opt => opt.Ignore())
                 .ForMember(dest => dest.Updateat, opt => opt.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(dest => dest.Createat, opt => opt.Ignore())
-                .ForMember(dest => dest.Createby, opt => opt.Ignore()) // không cho update
+                .ForMember(dest => dest.Createby, opt => opt.Ignore()) 
                 .ForMember(dest => dest.Exams, opt => opt.Ignore())
                 .ForMember(dest => dest.Groups, opt => opt.Ignore())
                 .ForMember(dest => dest.SemesterSubjects, opt => opt.Ignore());
@@ -92,7 +113,7 @@ namespace PRN232_GradingSystem_API.Mapping
 
             CreateMap<StudentFilterRequest, StudentBM>();
             CreateMap<StudentRequest, StudentBM>()
-           .ForMember(dest => dest.Studentid, opt => opt.Ignore()) // vì khi tạo mới chưa có ID
+           .ForMember(dest => dest.Studentid, opt => opt.Ignore()) 
            .ForMember(dest => dest.Createat, opt => opt.Ignore())
            .ForMember(dest => dest.GroupStudents, opt => opt.Ignore())
            .ForMember(dest => dest.Submissions, opt => opt.Ignore());
@@ -111,6 +132,23 @@ namespace PRN232_GradingSystem_API.Mapping
                 .ForMember(dest => dest.Semester, opt => opt.Ignore())
                 .ForMember(dest => dest.Subject, opt => opt.Ignore());
 
+            CreateMap<Question, QuestionBM>()
+                .ForMember(dest => dest.Questionid, opt => opt.MapFrom(src => src.QuestionId))
+                .ForMember(dest => dest.Examid, opt => opt.MapFrom(src => src.ExamId))
+                .ForMember(dest => dest.Qcode, opt => opt.MapFrom(src => src.QCode))
+                .ForMember(dest => dest.Maxscore, opt => opt.MapFrom(src => src.MaxScore))
+                .ReverseMap()
+                .ForMember(dest => dest.Exam, opt => opt.Ignore())        
+                .ForMember(dest => dest.Criteria, opt => opt.Ignore());
+            
+            CreateMap<Criterion, CriteriaBM>()
+                .ForMember(dest => dest.Criteriaid, opt => opt.MapFrom(src => src.CriteriaId))
+                .ForMember(dest => dest.Questionid, opt => opt.MapFrom(src => src.QuestionId))
+                .ForMember(dest => dest.Ismanual, opt => opt.MapFrom(src => src.IsManual))
+                .ForMember(dest => dest.Orderindex, opt => opt.MapFrom(src => src.OrderIndex))
+                .ReverseMap()
+                .ForMember(dest => dest.Question, opt => opt.Ignore())        
+                .ForMember(dest => dest.GradeDetails, opt => opt.Ignore());
 
             // ================== Paged Mapping ==================
             CreateMap(typeof(PagedResult<>), typeof(PagedResponse<>));
