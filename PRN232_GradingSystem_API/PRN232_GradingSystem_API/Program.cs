@@ -128,6 +128,7 @@ builder.Services.AddScoped<IExamRepository, ExamRepository>();
 
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<ICriteriaService, CriteriaService>();
+builder.Services.AddScoped<IRubricService, RubricService>();
 
 // JWT & Auth
 builder.Services.AddSingleton<PRN232.Lab2.CoffeeStore.Services.Helpers.JwtHelper>();

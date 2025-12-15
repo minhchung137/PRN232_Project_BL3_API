@@ -29,6 +29,8 @@ public partial class Exam
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
 
+    public string ExamCode { get; set; } = null!;
+
     public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
     
     [ForeignKey("SemesterId")]

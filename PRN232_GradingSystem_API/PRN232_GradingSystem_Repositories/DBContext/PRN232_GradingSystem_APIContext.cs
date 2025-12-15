@@ -139,10 +139,15 @@ public partial class PRN232_GradingSystem_APIContext : DbContext
 
             entity.ToTable("exam");
 
+            entity.HasIndex(e => e.ExamCode, "ux_exam_exam_code").IsUnique();
+
             entity.Property(e => e.ExamId).HasColumnName("exam_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");
+            entity.Property(e => e.ExamCode)
+                .HasMaxLength(100)
+                .HasColumnName("exam_code");
             entity.Property(e => e.ExamDate).HasColumnName("exam_date");
             entity.Property(e => e.ExamName)
                 .HasMaxLength(255)
