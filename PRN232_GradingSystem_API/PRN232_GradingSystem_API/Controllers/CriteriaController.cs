@@ -22,7 +22,7 @@ namespace PRN232_GradingSystem_API.Controllers
             _mapper = mapper;
         }
         
-        //[Authorize(Roles = "Admin,Teacher")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CriteriaResponse>>> Create(
             [FromBody] CriteriaRequest req)
@@ -60,7 +60,7 @@ namespace PRN232_GradingSystem_API.Controllers
             }
         }
         
-        //[Authorize]
+        [Authorize]
         [HttpGet("by-question/{questionId:int}")]
         public async Task<ActionResult<ApiResponse<List<CriteriaResponse>>>> GetByQuestion(
             int questionId)
@@ -105,7 +105,7 @@ namespace PRN232_GradingSystem_API.Controllers
                 response, "Criteria retrieved successfully"));
         }
         
-        //[Authorize(Roles = "Admin,Teacher")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{criteriaId:int}")]
         public async Task<ActionResult<ApiResponse<CriteriaResponse>>> Update(
             int criteriaId,
@@ -148,7 +148,7 @@ namespace PRN232_GradingSystem_API.Controllers
             }
         }
         
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{criteriaId:int}")]
         public async Task<ActionResult<ApiResponse<CriteriaResponse>>> Delete(int criteriaId)
         {

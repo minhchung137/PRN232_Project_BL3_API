@@ -22,7 +22,7 @@ namespace PRN232_GradingSystem_API.Controllers
             _mapper = mapper;
         }
         
-        //[Authorize(Roles = "Admin,Teacher")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<QuestionResponse>>> Create([FromBody] QuestionRequest req)
         {
@@ -59,7 +59,7 @@ namespace PRN232_GradingSystem_API.Controllers
             }
         }
         
-        //[Authorize]
+        [Authorize]
         [HttpGet("by-exam/{examId:int}")]
         public async Task<ActionResult<ApiResponse<List<QuestionResponse>>>> GetByExam(int examId)
         {
@@ -103,7 +103,7 @@ namespace PRN232_GradingSystem_API.Controllers
                 response, "Question retrieved successfully"));
         }
         
-        //[Authorize(Roles = "Admin,Teacher")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{questionId:int}")]
         public async Task<ActionResult<ApiResponse<QuestionResponse>>> Update(
             int questionId,
@@ -146,7 +146,7 @@ namespace PRN232_GradingSystem_API.Controllers
             }
         }
         
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{questionId:int}")]
         public async Task<ActionResult<ApiResponse<QuestionResponse>>> Delete(int questionId)
         {
