@@ -87,11 +87,20 @@ public class BackblazeStorageService : IFileStorageService
             {
                 if (string.IsNullOrEmpty(entry.Name)) continue; // skip directories
                 if (!IsSolutionZip(entry.Name)) continue; // only solution.zip
+
                 await using var entryStream = entry.Open();
+                using var ms = new MemoryStream();
+
                 var relative = GetRelativePath(entry.FullName, topName);
                 var entryKey = $"{prefixSegment}{SanitizeSegment(topName)}/{SanitizePath(relative)}";
-                var url = await UploadStreamAsync(entryStream, entryKey, "application/zip", cancellationToken);
-                
+
+                await entryStream.CopyToAsync(ms, cancellationToken);
+                ms.Position = 0;
+                var url = await UploadStreamAsync(ms, entryKey, "application/zip", cancellationToken);
+
+                //var url = await UploadStreamAsync(entryStream, entryKey, "application/zip", cancellationToken);
+
+
                 // Extract student code and solution
                 var studentCode = ExtractStudentCode(relative);
                 var solution = ExtractSolution(relative);
@@ -211,6 +220,9 @@ public class BackblazeStorageService : IFileStorageService
             ContentType = string.IsNullOrWhiteSpace(contentType) ? MediaTypeNames.Application.Octet : contentType,
             AutoCloseStream = false
         };
+
+        putRequest.Headers.ContentLength = stream.Length;
+
         await _s3Client.PutObjectAsync(putRequest, cancellationToken);
         return $"{_endpoint.TrimEnd('/')}/{_bucketName}/{Uri.EscapeDataString(key)}";
     }
