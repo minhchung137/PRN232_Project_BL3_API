@@ -55,7 +55,7 @@ public class BackblazeStorageService : IFileStorageService
         _s3Client = new AmazonS3Client(credentials, config);
     }
 
-    public async Task<IReadOnlyList<string>> UploadArchiveAsync(Stream contentStream, string fileName, string contentType, string prefix, int examId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<string>> UploadArchiveAsync(Stream contentStream, string fileName, string contentType, string prefix, int examId, string? entityName = null, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
@@ -117,7 +117,7 @@ public class BackblazeStorageService : IFileStorageService
                 {
                     try
                     {
-                        await PublishUploadMessageAsync(submission.Submissionid, entryKey, examCode, studentCode, examinerCode, cancellationToken);
+                        await PublishUploadMessageAsync(submission.Submissionid, entryKey, examCode, studentCode, examinerCode, entityName, cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -166,7 +166,7 @@ public class BackblazeStorageService : IFileStorageService
                 {
                     try
                     {
-                        await PublishUploadMessageAsync(submission.Submissionid, entryKey, examCode, studentCode, examinerCode, cancellationToken);
+                        await PublishUploadMessageAsync(submission.Submissionid, entryKey, examCode, studentCode, examinerCode, entityName, cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -252,7 +252,7 @@ public class BackblazeStorageService : IFileStorageService
         return normalized;
     }
 
-    private Task PublishUploadMessageAsync(int submissionId, string entryKey, string examCode, string studentId, string examinerCode, CancellationToken cancellationToken)
+    private Task PublishUploadMessageAsync(int submissionId, string entryKey, string examCode, string studentId, string examinerCode, string? entityName, CancellationToken cancellationToken)
     {
         var payload = JsonSerializer.Serialize(new 
         { 
@@ -260,7 +260,8 @@ public class BackblazeStorageService : IFileStorageService
             FileUrl = entryKey,
             ExamCode = examCode,
             StudentId = studentId,
-            ExaminerCode = examinerCode
+            ExaminerCode = examinerCode,
+            EntityName = entityName
         });
         return _publisher.PublishAsync(payload, cancellationToken);
     }

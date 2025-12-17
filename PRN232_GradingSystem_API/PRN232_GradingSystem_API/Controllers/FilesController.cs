@@ -57,6 +57,7 @@ public class FilesController : ControllerBase
             file.ContentType ?? string.Empty,
             request.Prefix ?? string.Empty,
             request.ExamId ?? 0,
+            request.EntityName,
             cancellationToken);
         return Ok(ApiResponse<IReadOnlyList<string>>.SuccessResponse(urls, "Uploaded"));
     }
