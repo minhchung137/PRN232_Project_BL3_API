@@ -396,8 +396,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
         {
             // Lấy grade để update (không cần include details để tránh heavy load)
             var grade = await UnitOfWork.GradeRepository.GetByIdAsync(gradeId, trackChanges: true);
-            if (grade == null)
-                throw new NotFoundException($"Grade with ID {gradeId} not found.");
+            if (grade == null || grade.Status != "AppealRequested")
+                throw new NotFoundException($"Grade with ID {gradeId} not found for appealling.");
 
             // Cập nhật điểm nếu có
             if (q1.HasValue) grade.Q1 = q1.Value;
@@ -456,10 +456,10 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             if (grade == null)
                 throw new NotFoundException($"Grade with ID {gradeId} not found.");
 
-            if (grade.Submission == null || grade.Submission.StudentId != studentId)
-            {
-                throw new ValidationException("You are not authorized to appeal this grade.");
-            }
+            //if (grade.Submission == null || grade.Submission.StudentId != studentId)
+            //{
+            //    throw new ValidationException("You are not authorized to appeal this grade.");
+            //}
 
             if (grade.GradeCount >= 2 || grade.Status == "ModeratorApproved")
             {
