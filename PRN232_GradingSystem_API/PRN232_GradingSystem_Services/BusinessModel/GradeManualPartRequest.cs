@@ -1,29 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace PRN232_GradingSystem_API.Models.RequestModel
+namespace PRN232_GradingSystem_Services.BusinessModel
 {
-    public class ModeratorReviewRequest
+    public class GradeManualPartRequest
     {
         [Required]
         public int GradeId { get; set; }
-
-        [Range(0, 1, ErrorMessage = "Q1 must be between 0 and 1.")]
-        public decimal? Q1 { get; set; }
-
-        [Range(0, 1, ErrorMessage = "Q2 must be between 0 and 1.")]
-        public decimal? Q2 { get; set; }
-
-        [Range(0, 0.5, ErrorMessage = "Q3 must be between 0 and 0.5.")]
-        public decimal? Q3 { get; set; }
-
-        [Range(0, 1, ErrorMessage = "Q4 must be between 0 and 1.")]
-        public decimal? Q4 { get; set; }
-
-        [Range(0, 0.5, ErrorMessage = "Q5 must be between 0 and 0.5.")]
-        public decimal? Q5 { get; set; }
-
-        [Range(0, 2, ErrorMessage = "Q6 must be between 0 and 2.")]
-        public decimal? Q6 { get; set; }
 
         [Range(0, 1, ErrorMessage = "Q7 must be between 0 and 1.")]
         public decimal? Q7 { get; set; }

@@ -18,6 +18,12 @@ namespace PRN232_GradingSystem_API.Models.RequestModel
         public decimal? Q5 { get; set; }
 
         public decimal? Q6 { get; set; }
+        public decimal? Q7 { get; set; }
+        public decimal? Q8 { get; set; }
+        public decimal? Q9 { get; set; }
+        public decimal? Q10 { get; set; }
+        public decimal? Q11 { get; set; }
+        public decimal? Q12 { get; set; }
 
         public decimal? Totalscore { get; set; }
         public string? Status { get; set; }
@@ -25,7 +31,7 @@ namespace PRN232_GradingSystem_API.Models.RequestModel
         public DateTime? Createat { get; set; }
 
         public DateTime? Updateat { get; set; }
-        public int? Marker { get; set; }
+        public int? MarkerId { get; set; }
 
         // Pagination
         public int PageNumber { get; set; } = 1;
@@ -40,24 +46,37 @@ namespace PRN232_GradingSystem_API.Models.RequestModel
         [Range(0, 1, ErrorMessage = "Q1 must be between 0 and 1.")]
         public decimal? Q1 { get; set; }
 
-        [Range(0, 1.5, ErrorMessage = "Q2 must be between 0 and 1.5.")]
+        [Range(0, 1, ErrorMessage = "Q2 must be between 0 and 1.")]
         public decimal? Q2 { get; set; }
 
-        [Range(0, 2.5, ErrorMessage = "Q3 must be between 0 and 2.5.")]
+        [Range(0, 0.5, ErrorMessage = "Q3 must be between 0 and 0.5.")]
         public decimal? Q3 { get; set; }
 
-        [Range(0, 2, ErrorMessage = "Q4 must be between 0 and 2.")]
+        [Range(0, 1, ErrorMessage = "Q4 must be between 0 and 1.")]
         public decimal? Q4 { get; set; }
 
-        [Range(0, 1.5, ErrorMessage = "Q5 must be between 0 and 1.5.")]
+        [Range(0, 0.5, ErrorMessage = "Q5 must be between 0 and 0.5.")]
         public decimal? Q5 { get; set; }
 
-        [Range(0, 1.5, ErrorMessage = "Q6 must be between 0 and 1.5.")]
+        [Range(0, 2, ErrorMessage = "Q6 must be between 0 and 2.")]
         public decimal? Q6 { get; set; }
+
+        [Range(0, 1, ErrorMessage = "Q7 must be between 0 and 1.")]
+        public decimal? Q7 { get; set; }
+        [Range(0, 0.25, ErrorMessage = "Q8 must be between 0 and 0.25.")]
+        public decimal? Q8 { get; set; }
+        [Range(0, 0.25, ErrorMessage = "Q9 must be between 0 and 0.25.")]
+        public decimal? Q9 { get; set; }
+        [Range(0, 1.25, ErrorMessage = "Q10 must be between 0 and 1.25.")]
+        public decimal? Q10 { get; set; }
+        [Range(0, 0.75, ErrorMessage = "Q11 must be between 0 and 0.75.")]
+        public decimal? Q11 { get; set; }
+        [Range(0, 0.5, ErrorMessage = "Q12 must be between 0 and 0.5.")]
+        public decimal? Q12 { get; set; }
 
         [Required(ErrorMessage = "Marker is required.")]
         [Range(0, int.MaxValue, ErrorMessage = "MarkerID must be positive number")]
-        public int? Marker { get; set; }
+        public int? MarkerId { get; set; }
     }
 
     public class GradeWithDetailsRequest

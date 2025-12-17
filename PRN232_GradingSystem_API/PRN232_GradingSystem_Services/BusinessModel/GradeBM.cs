@@ -15,6 +15,12 @@ namespace PRN232_GradingSystem_Services.BusinessModel
         public decimal? Q4 { get; set; }
         public decimal? Q5 { get; set; }
         public decimal? Q6 { get; set; }
+        public decimal? Q7 { get; set; }
+        public decimal? Q8 { get; set; }
+        public decimal? Q9 { get; set; }
+        public decimal? Q10 { get; set; }
+        public decimal? Q11 { get; set; }
+        public decimal? Q12 { get; set; }
 
         public decimal? Totalscore { get; set; }
         public string? Status { get; set; }

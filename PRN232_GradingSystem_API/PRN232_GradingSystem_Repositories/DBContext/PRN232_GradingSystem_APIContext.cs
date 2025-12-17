@@ -194,6 +194,24 @@ public partial class PRN232_GradingSystem_APIContext : DbContext
             entity.Property(e => e.Q6)
                 .HasPrecision(5, 2)
                 .HasColumnName("q6");
+            entity.Property(e => e.Q7)
+                .HasPrecision(5, 2)
+                .HasColumnName("q7");
+            entity.Property(e => e.Q8)
+                .HasPrecision(5, 2)
+                .HasColumnName("q8");
+            entity.Property(e => e.Q9)
+                .HasPrecision(5, 2)
+                .HasColumnName("q9");
+            entity.Property(e => e.Q10)
+                .HasPrecision(5, 2)
+                .HasColumnName("q10");
+            entity.Property(e => e.Q11)
+                .HasPrecision(5, 2)
+                .HasColumnName("q11");
+            entity.Property(e => e.Q12)
+                .HasPrecision(5, 2)
+                .HasColumnName("q12");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasColumnName("status");

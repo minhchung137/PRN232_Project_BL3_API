@@ -2,6 +2,7 @@
 using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.OData.Query;
 using PRN232_GradingSystem_API.Models.RequestModel;
 using PRN232_GradingSystem_API.Models.ResponseModel;
@@ -86,6 +87,47 @@ namespace PRN232_GradingSystem_API.Controllers
             {
                 return StatusCode(500, ApiResponse<GradeResponse>.FailResponse(
                     "An unexpected error occurred while creating the grade.", 500));
+            }
+        }
+
+        [HttpPut("manual-part")]
+        public async Task<ActionResult<ApiResponse<GradeResponse>>> UpdateManualPart(GradeManualPartRequest request)
+        {
+            try
+            {
+                var userIdString = User.FindFirst("UserId")?.Value
+                                ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int moderatorId))
+                {
+                    return Unauthorized(ApiResponse<GradeResponse>.FailResponse("Token không hợp lệ: Không tìm thấy User ID.", 401));
+                }
+
+                var updated = await _service.UpdateManualPartAsync(request.GradeId,
+                    request.Q7, request.Q8, request.Q9, request.Q10, request.Q11, request.Q12,
+                    request.Note,
+                    moderatorId);
+                if (updated == null)
+                    return NotFound(ApiResponse<GradeResponse>.FailResponse($"Grade with ID {request.GradeId} not found.", 404));
+                var response = _mapper.Map<GradeResponse>(updated);
+                return Ok(ApiResponse<GradeResponse>.SuccessResponse(response, "Grade manual part updated successfully"));
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ApiResponse<GradeResponse>.FailResponse(ex.Message, 400));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ApiResponse<GradeResponse>.FailResponse(ex.Message, 404));
+            }
+            catch (ConflictException ex)
+            {
+                return Conflict(ApiResponse<GradeResponse>.FailResponse(ex.Message, 409));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, ApiResponse<GradeResponse>.FailResponse(
+                    "An unexpected error occurred while updating the grade manual part.", 500));
             }
         }
 
@@ -235,15 +277,17 @@ namespace PRN232_GradingSystem_API.Controllers
         // LUỒNG 2: MODERATOR LẤY DANH SÁCH ĐƠN CHỜ DUYỆT (View Pending List)
         [HttpGet("appeals")]
         //[Authorize(Roles = "Moderator, Admin")]
-        public async Task<ActionResult<ApiResponse<PagedResult<GradeBM>>>> GetPendingAppeals(
+        public async Task<ActionResult<ApiResponse<PagedResult<GradeResponse>>>> GetPendingAppeals(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
                 var result = await _service.GetPendingAppealsAsync(pageNumber, pageSize);
+                //var response = _mapper.Map<GradeResponse>(result);
+                var response = _mapper.Map<PagedResponse<GradeResponse>>(result);
 
-                return Ok(ApiResponse<PagedResult<GradeBM>>.SuccessResponse(result, "Lấy danh sách phúc khảo thành công."));
+                return Ok(ApiResponse<PagedResponse<GradeResponse>>.SuccessResponse(response, "Lấy danh sách phúc khảo thành công."));
             }
             catch (Exception ex)
             {

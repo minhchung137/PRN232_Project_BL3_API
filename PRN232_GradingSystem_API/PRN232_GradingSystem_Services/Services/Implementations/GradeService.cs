@@ -98,14 +98,26 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             // Quy định thang điểm tối đa cho từng câu
             var maxScores = new Dictionary<string, decimal>
             {
-                { "Q1", 1.0m }, { "Q2", 1.5m }, { "Q3", 2.5m },
-                { "Q4", 2.0m }, { "Q5", 1.5m }, { "Q6", 1.5m }
+                { "Q1", 1.0m }, { "Q2", 1.0m }, { "Q3", 0.5m },
+                { "Q4", 1.0m }, { "Q5", 0.5m }, { "Q6", 2.0m },
+                { "Q7", 1.0m }, { "Q8", 0.25m }, { "Q9", 0.25m },
+                { "Q10", 1.25m }, { "Q11", 0.75m }, { "Q12", 0.5m }
             };
 
             var scoreMap = new Dictionary<string, decimal?>
                 {
-                    { "Q1", model.Q1 }, { "Q2", model.Q2 }, { "Q3", model.Q3 },
-                    { "Q4", model.Q4 }, { "Q5", model.Q5 }, { "Q6", model.Q6 }
+                    { "Q1", model.Q1},
+                    { "Q2", model.Q2},
+                    { "Q3", model.Q3},
+                    { "Q4", model.Q4},
+                    { "Q5", model.Q5},
+                    { "Q6", model.Q6},
+                    { "Q7", model.Q7},
+                    { "Q8", model.Q8},
+                    { "Q9", model.Q9},
+                    { "Q10", model.Q10},
+                    { "Q11", model.Q11},
+                    { "Q12", model.Q12}
                 };
 
             // Phải có ít nhất 1 câu
@@ -169,8 +181,10 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
 
             var maxScores = new Dictionary<string, decimal>
             {
-                { "Q1", 1.0m }, { "Q2", 1.5m }, { "Q3", 2.5m },
-                { "Q4", 2.0m }, { "Q5", 1.5m }, { "Q6", 1.5m }
+                { "Q1", 1.0m }, { "Q2", 1.0m }, { "Q3", 0.5m },
+                { "Q4", 1.0m }, { "Q5", 0.5m }, { "Q6", 2.0m },
+                { "Q7", 1.0m }, { "Q8", 0.25m }, { "Q9", 0.25m },
+                { "Q10", 1.25m }, { "Q11", 0.75m }, { "Q12", 0.5m }
             };
 
             var scoreMap = new Dictionary<string, decimal?>
@@ -180,7 +194,13 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 { "Q3", model.Q3 ?? existing.Q3 },
                 { "Q4", model.Q4 ?? existing.Q4 },
                 { "Q5", model.Q5 ?? existing.Q5 },
-                { "Q6", model.Q6 ?? existing.Q6 }
+                { "Q6", model.Q6 ?? existing.Q6 },
+                { "Q7", model.Q7 ?? existing.Q7 },
+                { "Q8", model.Q8 ?? existing.Q8 },
+                { "Q9", model.Q9 ?? existing.Q9 },
+                { "Q10", model.Q10 ?? existing.Q10 },
+                { "Q11", model.Q11 ?? existing.Q11 },
+                { "Q12", model.Q12 ?? existing.Q12 }
             };
 
             foreach (var (key, value) in scoreMap)
@@ -200,6 +220,12 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             existing.Q4 = scoreMap["Q4"];
             existing.Q5 = scoreMap["Q5"];
             existing.Q6 = scoreMap["Q6"];
+            existing.Q7 = scoreMap["Q7"];
+            existing.Q8 = scoreMap["Q8"];
+            existing.Q9 = scoreMap["Q9"];
+            existing.Q10 = scoreMap["Q10"];
+            existing.Q11 = scoreMap["Q11"];
+            existing.Q12 = scoreMap["Q12"];
             existing.TotalScore = scoreMap.Values.Where(v => v.HasValue).Sum(v => v.Value);
             existing.UpdatedAt = DateTime.UtcNow;
 
@@ -271,6 +297,12 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 Q4 = model.Gradedetails.Where(x => x.Qcode == "Q4").Sum(x => x.Point ?? 0),
                 Q5 = model.Gradedetails.Where(x => x.Qcode == "Q5").Sum(x => x.Point ?? 0),
                 Q6 = model.Gradedetails.Where(x => x.Qcode == "Q6").Sum(x => x.Point ?? 0),
+                Q7 = model.Gradedetails.Where(x => x.Qcode == "Q7").Sum(x => x.Point ?? 0),
+                Q8 = model.Gradedetails.Where(x => x.Qcode == "Q8").Sum(x => x.Point ?? 0),
+                Q9 = model.Gradedetails.Where(x => x.Qcode == "Q9").Sum(x => x.Point ?? 0),
+                Q10 = model.Gradedetails.Where(x => x.Qcode == "Q10").Sum(x => x.Point ?? 0),
+                Q11 = model.Gradedetails.Where(x => x.Qcode == "Q11").Sum(x => x.Point ?? 0),
+                Q12 = model.Gradedetails.Where(x => x.Qcode == "Q12").Sum(x => x.Point ?? 0),
                 Totalscore = model.Gradedetails.Sum(x => x.Point ?? 0)
             };
 
@@ -434,10 +466,10 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 throw new ValidationException("This grade has already been reviewed/finalized. Cannot appeal again.");
             }
 
-            if (grade.Status != "TeacherVerified")
-            {
-                throw new ValidationException("Grade is not ready for appeal (Must be verified by Teacher first).");
-            }
+            //if (grade.Status != "TeacherVerified")
+            //{
+            //    throw new ValidationException("Grade is not ready for appeal (Must be verified by Teacher first).");
+            //}
 
             if (grade.Status == "AppealRequested")
             {
@@ -472,6 +504,63 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             };
 
             return await GetPagedFilteredAsync(filter, pageNumber, pageSize);
+        }
+
+        public async Task<GradeBM> UpdateManualPartAsync(int gradeId, decimal? q7, decimal? q8, decimal? q9, decimal? q10, decimal? q11, decimal? q12, string note, int moderatorId)
+        {
+            var grade = await UnitOfWork.GradeRepository.GetByIdAsync(gradeId, trackChanges: true);
+            if (grade == null)
+                throw new NotFoundException($"Grade with ID {gradeId} not found.");
+
+            // Cập nhật điểm nếu có
+            if (q7.HasValue) grade.Q7 = q7.Value;
+            if (q8.HasValue) grade.Q8 = q8.Value;
+            if (q9.HasValue) grade.Q9 = q9.Value;
+            if (q10.HasValue) grade.Q10 = q10.Value;
+            if (q11.HasValue) grade.Q11 = q11.Value;
+            if (q12.HasValue) grade.Q12 = q12.Value;
+
+            // Tính lại total
+            grade.TotalScore = (grade.Q1 ?? 0) + (grade.Q2 ?? 0) + (grade.Q3 ?? 0) +
+                              (grade.Q4 ?? 0) + (grade.Q5 ?? 0) + (grade.Q6 ?? 0) +
+                              (grade.Q7 ?? 0) + (grade.Q8 ?? 0) + (grade.Q9 ?? 0) +
+                              (grade.Q10 ?? 0) + (grade.Q11 ?? 0) + (grade.Q12 ?? 0);
+
+            // Cập nhật trạng thái & thông tin moderator
+            grade.Status = "TeacherVerified";
+            grade.GradeCount = 2;
+            grade.MarkerId = moderatorId;  // Ghi đè marker thành moderator (theo nghiệp vụ hiện tại)
+            grade.UpdatedAt = DateTime.UtcNow;
+
+            // Tạo note của moderator
+            var moderatorNoteDetail = new GradeDetail
+            {
+                GradeId = gradeId,
+                QCode = "MOD",
+                SubCode = "REVIEW",
+                Point = grade.TotalScore,
+                Note = note,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            // Update grade và add detail
+            UnitOfWork.GradeRepository.Update(grade);
+            await UnitOfWork.GradedetailRepository.AddAsync(moderatorNoteDetail);
+
+            // Save trước khi query lại
+            await UnitOfWork.SaveChangesAsync();
+
+            // === THAY ĐỔI QUAN TRỌNG: Dùng ProjectTo để lấy dữ liệu mới nhất mà không gặp cycle ===
+            var query = UnitOfWork.GradeRepository.GetAllWithDetails()
+                          .Where(g => g.GradeId == gradeId);
+
+            var updatedGradeBM = await _mapper.ProjectTo<GradeBM>(query)
+                                              .SingleOrDefaultAsync();
+
+            if (updatedGradeBM == null)
+                throw new Exception("Failed to retrieve updated grade.");
+
+            return updatedGradeBM;
         }
     }
 }

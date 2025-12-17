@@ -39,6 +39,24 @@ public partial class Grade
     [Column("q6")]
     [Precision(5, 2)]
     public decimal? Q6 { get; set; }
+    [Column("q7")]
+    [Precision(5, 2)]
+    public decimal? Q7 { get; set; }
+    [Column("q8")]
+    [Precision(5, 2)]
+    public decimal? Q8 { get; set; }
+    [Column("q9")]
+    [Precision(5, 2)]
+    public decimal? Q9 { get; set; }
+    [Column("q10")]
+    [Precision(5, 2)]
+    public decimal? Q10 { get; set; }
+    [Column("q11")]
+    [Precision(5, 2)]
+    public decimal? Q11 { get; set; }
+    [Column("q12")]
+    [Precision(5, 2)]
+    public decimal? Q12 { get; set; }
 
     [Column("total_score")]
     [Precision(5, 2)]
