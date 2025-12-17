@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -68,6 +68,21 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             SubScores = new Dictionary<string, decimal>
             {
                 { "Delete with SignalR", 1.5m }
+            }
+        },
+        // API Grading: Tiêu chí chấm điểm API endpoints
+        // Max scores phải khớp với ApiGradingService trong Worker
+        new QuestionScore
+        {
+            Qcode = "API",
+            SubScores = new Dictionary<string, decimal>
+            {
+                { "Create", 1.0m },      // MaxScore từ ApiGradingService
+                { "Update", 1.0m },
+                { "Delete", 0.5m },
+                { "GetAll", 1.0m },
+                { "GetById", 0.5m },
+                { "Search", 2.0m }
             }
         }
     };

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PRN232_GradingSystem_Repositories.Models;
 using PRN232_GradingSystem_Repositories.UnitOfWork;
