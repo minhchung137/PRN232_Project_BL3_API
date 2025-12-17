@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using PRN232_GradingSystem_Repositories.Models;
 using PRN232_GradingSystem_Repositories.UnitOfWork;
 using PRN232_GradingSystem_Services.BusinessModel;
@@ -270,6 +270,8 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
                 Q4 = model.Gradedetails.Where(x => x.Qcode == "Q4").Sum(x => x.Point ?? 0),
                 Q5 = model.Gradedetails.Where(x => x.Qcode == "Q5").Sum(x => x.Point ?? 0),
                 Q6 = model.Gradedetails.Where(x => x.Qcode == "Q6").Sum(x => x.Point ?? 0),
+                // Lưu ý: API grading (Qcode = "API") không được tính vào Q1-Q6,
+                // nhưng vẫn được tính vào Totalscore
                 Totalscore = model.Gradedetails.Sum(x => x.Point ?? 0)
             };
 
