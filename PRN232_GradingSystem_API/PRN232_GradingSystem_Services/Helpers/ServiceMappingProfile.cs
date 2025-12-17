@@ -23,13 +23,13 @@ namespace PRN232_GradingSystem_Services.Helpers
                 .ForMember(dest => dest.Gradeid, opt => opt.MapFrom(src => src.GradeId))
                 .ForMember(dest => dest.Submissionid, opt => opt.MapFrom(src => src.SubmissionId))
                 // Map ID: Grade.MarkerId (Entity) -> GradeBM.Marker (int)
-                .ForMember(dest => dest.Marker, opt => opt.MapFrom(src => src.MarkerId))
+                .ForMember(dest => dest.MarkerId, opt => opt.MapFrom(src => src.MarkerId))
                 // Map Navigation: Grade.Marker (Entity) -> GradeBM.MarkerNavigation
                 .ForMember(dest => dest.MarkerNavigation, opt => opt.MapFrom(src => src.Marker))
                 .ReverseMap()
                 .ForMember(dest => dest.Submission, opt => opt.Ignore())
                 // Khi map ngược: GradeBM.Marker (int) -> Grade.MarkerId
-                .ForMember(dest => dest.MarkerId, opt => opt.MapFrom(src => src.Marker))
+                .ForMember(dest => dest.MarkerId, opt => opt.MapFrom(src => src.MarkerId))
                 // Bỏ qua Navigation khi map ngược để tránh lỗi
                 .ForMember(dest => dest.Marker, opt => opt.Ignore())
                 .ForMember(dest => dest.GradeDetails, opt => opt.Ignore());

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PRN232_GradingSystem_Repositories.Models;
 using PRN232_GradingSystem_Repositories.UnitOfWork;
 using PRN232_GradingSystem_Services.BusinessModel;
@@ -83,16 +84,16 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             if (!model.Submissionid.HasValue)
                 throw new ValidationException("Submission ID must be provided.");
 
-            if (!model.Marker.HasValue)
+            if (!model.MarkerId.HasValue)
                 throw new ValidationException("Marker (User) must be provided.");
 
             var submissionExists = await submissionRepo.ExistsAsync(model.Submissionid.Value);
             if (!submissionExists)
                 throw new NotFoundException($"Submission with ID '{model.Submissionid}' does not exist.");
 
-            var markerExists = await userRepo.ExistsAsync(model.Marker.Value);
+            var markerExists = await userRepo.ExistsAsync(model.MarkerId.Value);
             if (!markerExists)
-                throw new NotFoundException($"Marker (User) with ID '{model.Marker}' does not exist.");
+                throw new NotFoundException($"Marker (User) with ID '{model.MarkerId}' does not exist.");
 
             // Quy định thang điểm tối đa cho từng câu
             var maxScores = new Dictionary<string, decimal>
@@ -155,16 +156,16 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             if (!model.Submissionid.HasValue)
                 throw new ValidationException("Submission ID must be provided.");
 
-            if (!model.Marker.HasValue)
+            if (!model.MarkerId.HasValue)
                 throw new ValidationException("Marker (User) must be provided.");
 
             var submissionExists = await submissionRepo.ExistsAsync(model.Submissionid.Value);
             if (!submissionExists)
                 throw new NotFoundException($"Submission with ID '{model.Submissionid}' does not exist.");
 
-            var markerExists = await userRepo.ExistsAsync(model.Marker.Value);
+            var markerExists = await userRepo.ExistsAsync(model.MarkerId.Value);
             if (!markerExists)
-                throw new NotFoundException($"Marker (User) with ID '{model.Marker}' does not exist.");
+                throw new NotFoundException($"Marker (User) with ID '{model.MarkerId}' does not exist.");
 
             var maxScores = new Dictionary<string, decimal>
             {
@@ -263,7 +264,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             var grade = new GradeBM
             {
                 Submissionid = model.Submissionid,
-                Marker = markerId,
+                MarkerId = markerId,
                 Q1 = model.Gradedetails.Where(x => x.Qcode == "Q1").Sum(x => x.Point ?? 0),
                 Q2 = model.Gradedetails.Where(x => x.Qcode == "Q2").Sum(x => x.Point ?? 0),
                 Q3 = model.Gradedetails.Where(x => x.Qcode == "Q3").Sum(x => x.Point ?? 0),
@@ -356,16 +357,19 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
         }
 
         // Moderator Review Method
+        // Moderator Review Method
         public async Task<GradeBM> ModeratorReviewAsync(
             int gradeId,
             decimal? q1, decimal? q2, decimal? q3, decimal? q4, decimal? q5, decimal? q6,
             string note,
             int moderatorId)
         {
-            var grade = await UnitOfWork.GradeRepository.GetByIdAsync(gradeId);
+            // Lấy grade để update (không cần include details để tránh heavy load)
+            var grade = await UnitOfWork.GradeRepository.GetByIdAsync(gradeId, trackChanges: true);
             if (grade == null)
                 throw new NotFoundException($"Grade with ID {gradeId} not found.");
 
+            // Cập nhật điểm nếu có
             if (q1.HasValue) grade.Q1 = q1.Value;
             if (q2.HasValue) grade.Q2 = q2.Value;
             if (q3.HasValue) grade.Q3 = q3.Value;
@@ -373,31 +377,45 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             if (q5.HasValue) grade.Q5 = q5.Value;
             if (q6.HasValue) grade.Q6 = q6.Value;
 
+            // Tính lại total
             grade.TotalScore = (grade.Q1 ?? 0) + (grade.Q2 ?? 0) + (grade.Q3 ?? 0) +
                                (grade.Q4 ?? 0) + (grade.Q5 ?? 0) + (grade.Q6 ?? 0);
 
+            // Cập nhật trạng thái & thông tin moderator
             grade.Status = "ModeratorApproved";
-            grade.GradeCount = 2;   
-            grade.MarkerId = moderatorId; 
+            grade.GradeCount = 2;
+            grade.MarkerId = moderatorId;  // Ghi đè marker thành moderator (theo nghiệp vụ hiện tại)
             grade.UpdatedAt = DateTime.UtcNow;
 
+            // Tạo note của moderator
             var moderatorNoteDetail = new GradeDetail
             {
                 GradeId = gradeId,
-                QCode = "MOD",         
-                SubCode = "REVIEW",      
+                QCode = "MOD",
+                SubCode = "REVIEW",
                 Point = grade.TotalScore,
-                Note = note,            
+                Note = note,
                 CreatedAt = DateTime.UtcNow
             };
 
+            // Update grade và add detail
             UnitOfWork.GradeRepository.Update(grade);
             await UnitOfWork.GradedetailRepository.AddAsync(moderatorNoteDetail);
 
+            // Save trước khi query lại
             await UnitOfWork.SaveChangesAsync();
 
-            var updatedGrade = await UnitOfWork.GradeRepository.GetByIdWithDetailsAsync(gradeId);
-            return _mapper.Map<GradeBM>(updatedGrade);
+            // === THAY ĐỔI QUAN TRỌNG: Dùng ProjectTo để lấy dữ liệu mới nhất mà không gặp cycle ===
+            var query = UnitOfWork.GradeRepository.GetAllWithDetails()
+                          .Where(g => g.GradeId == gradeId);
+
+            var updatedGradeBM = await _mapper.ProjectTo<GradeBM>(query)
+                                              .SingleOrDefaultAsync();
+
+            if (updatedGradeBM == null)
+                throw new Exception("Failed to retrieve updated grade.");
+
+            return updatedGradeBM;
         }
 
         // SINH VIÊN GỬI YÊU CẦU PHÚC KHẢO

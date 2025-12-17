@@ -123,15 +123,15 @@ namespace PRN232_GradingSystem_API.Controllers
 
 
         // ===== DELETE: api/grade/{id} =====
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult<ApiResponse<string>>> Delete(int id)
-        {
-            //var ok = await _service.DeleteAsync(id);
-            //if (!ok)
-            //    return NotFound(ApiResponse<string>.FailResponse($"Grade with ID {id} not found.", 404));
+        //[HttpDelete("{id:int}")]
+        //public async Task<ActionResult<ApiResponse<string>>> Delete(int id)
+        //{
+        //    var ok = await _service.DeleteAsync(id);
+        //    if (!ok)
+        //        return NotFound(ApiResponse<string>.FailResponse($"Grade with ID {id} not found.", 404));
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         [HttpPost("with-details")]
         public async Task<ActionResult<ApiResponse<GradeResponse>>> CreateWithDetails(GradeWithDetailsRequest request)
@@ -194,7 +194,7 @@ namespace PRN232_GradingSystem_API.Controllers
 
         // LUỒNG 1: SINH VIÊN GỬI YÊU CẦU PHÚC KHẢO (Student Appeal)
         [HttpPost("appeal")]
-        [Authorize(Roles = "Student")]
+        //[Authorize(Roles = "Student")]
         public async Task<ActionResult<ApiResponse<object>>> RequestAppeal([FromBody] StudentAppealRequest request)
         {
             try
@@ -234,7 +234,7 @@ namespace PRN232_GradingSystem_API.Controllers
 
         // LUỒNG 2: MODERATOR LẤY DANH SÁCH ĐƠN CHỜ DUYỆT (View Pending List)
         [HttpGet("appeals")]
-        [Authorize(Roles = "Moderator, Admin")]
+        //[Authorize(Roles = "Moderator, Admin")]
         public async Task<ActionResult<ApiResponse<PagedResult<GradeBM>>>> GetPendingAppeals(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
@@ -253,7 +253,7 @@ namespace PRN232_GradingSystem_API.Controllers
 
         // LUỒNG 3: MODERATOR CHẤM LẠI & CHỐT ĐƠN (Review & Finalize)
         [HttpPut("moderator-review")]
-        [Authorize(Roles = "Moderator, Admin")]
+        //[Authorize(Roles = "Moderator, Admin")]
         public async Task<ActionResult<ApiResponse<GradeResponse>>> ModeratorReview([FromBody] ModeratorReviewRequest request)
         {
             try
@@ -273,6 +273,7 @@ namespace PRN232_GradingSystem_API.Controllers
                     moderatorId
                 );
 
+                var updateGrade = _service.GetByIdAsync(updatedGradeBM.Gradeid);
                 var response = _mapper.Map<GradeResponse>(updatedGradeBM);
 
                 return Ok(ApiResponse<GradeResponse>.SuccessResponse(response, "Phúc khảo thành công. Điểm đã được cập nhật."));

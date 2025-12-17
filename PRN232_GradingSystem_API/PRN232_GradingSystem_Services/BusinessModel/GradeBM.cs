@@ -22,7 +22,7 @@ namespace PRN232_GradingSystem_Services.BusinessModel
         public DateTime? Createat { get; set; }
         public DateTime? Updateat { get; set; }
 
-        public int? Marker { get; set; }
+        public int? MarkerId { get; set; }
 
         public Submission Submission { get; set; }
         public AppUser MarkerNavigation { get; set; }
