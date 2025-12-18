@@ -15,7 +15,7 @@ namespace PRN232_GradingSystem_API.Models.RequestModel
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }
-    [GradedetailValidation]
+    //[GradedetailValidation]
 
     public class GradedetailCreateRequest
     {

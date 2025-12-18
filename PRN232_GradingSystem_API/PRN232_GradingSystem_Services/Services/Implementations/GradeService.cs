@@ -279,7 +279,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             var qsubSet = new HashSet<string>();
             foreach (var gd in model.Gradedetails)
             {
-                ValidateSubcodeAndPoint(gd.Qcode, gd.Subcode, gd.Point);
+                //ValidateSubcodeAndPoint(gd.Qcode, gd.Subcode, gd.Point);
 
                 var key = $"{gd.Qcode}-{gd.Subcode}";
                 if (!qsubSet.Add(key))
@@ -289,7 +289,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             // ===== CREATE GRADE =====
             var grade = new GradeBM
             {
-                Submissionid = model.Submissionid,
+                //Submissionid = model.Submissionid,
                 MarkerId = markerId,
                 Q1 = model.Gradedetails.Where(x => x.Qcode == "Q1").Sum(x => x.Point ?? 0),
                 Q2 = model.Gradedetails.Where(x => x.Qcode == "Q2").Sum(x => x.Point ?? 0),
@@ -307,6 +307,7 @@ namespace PRN232_GradingSystem_Services.Services.Implementations
             };
 
             var gradeEntity = _mapper.Map<Grade>(grade);
+            gradeEntity.SubmissionId = model.Submissionid;
             gradeEntity.CreatedAt = DateTime.UtcNow;
             gradeEntity.UpdatedAt = null;
             gradeEntity.Status = "AutoGraded";
