@@ -14,7 +14,8 @@ using System.Security.Claims;
 namespace PRN232_GradingSystem_API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/grades")]
+    //[Route("api/[controller]")]
     public class GradeController : ControllerBase
     {
         private readonly IGradeService _service;

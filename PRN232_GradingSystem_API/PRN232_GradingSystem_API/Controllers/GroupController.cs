@@ -10,7 +10,8 @@ using PRN232_GradingSystem_Services.Services.Interfaces;
 namespace PRN232_GradingSystem_API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/groups")]
+    //[Route("api/[controller]")]
     public class GroupController : ControllerBase
     {
         private readonly IGroupService _service;

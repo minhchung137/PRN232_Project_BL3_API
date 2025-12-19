@@ -10,7 +10,8 @@ using PRN232_GradingSystem_Services.Services.Interfaces;
 namespace PRN232_GradingSystem_API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
+    [Route("api/semester-subjects")]
     public class SemesterSubjectController : ControllerBase
     {
         private readonly ISemesterSubjectService _service;

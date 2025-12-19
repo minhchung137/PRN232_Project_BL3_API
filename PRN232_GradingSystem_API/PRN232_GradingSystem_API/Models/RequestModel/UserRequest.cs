@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace PRN232_GradingSystem_API.Models.RequestModel
 {
@@ -21,20 +22,24 @@ namespace PRN232_GradingSystem_API.Models.RequestModel
 
         [Required]
         [EmailAddress]
+        [DefaultValue("chung@gmail.com")]
         [MaxLength(100)]
         public string Email { get; set; }
 
         [Required]
         [MinLength(6)]
+        [DefaultValue("Abc@123")]
         public string Password { get; set; }
     }
 
     public class LoginRequest
     {
-        //[Required]
+        [Required]
+        [DefaultValue("chung@gmail.com")]
         public string UsernameOrEmail { get; set; }
 
-        //[Required]
+        [Required]
+        [DefaultValue("Abc@123")]
         public string Password { get; set; }
     }
 

@@ -11,7 +11,8 @@ using PRN232_GradingSystem_Services.Services.Interfaces;
 namespace PRN232_GradingSystem_API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/grade-details")]
+    //[Route("api/[controller]")]
     public class GradedetailController : ControllerBase
     {
         private readonly IGradedetailService _service;

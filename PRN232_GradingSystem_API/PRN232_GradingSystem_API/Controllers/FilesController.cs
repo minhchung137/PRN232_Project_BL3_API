@@ -13,7 +13,8 @@ using PRN232_GradingSystem_API.Models;
 namespace PRN232_GradingSystem_API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/files")]
+//[Route("api/[controller]")]
 public class FilesController : ControllerBase
 {
     private static readonly string[] AllowedExtensions = new[] { ".zip", ".rar" };

@@ -1,29 +1,30 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace PRN232_GradingSystem_API.Models.RequestModel
 {
     public class GradeFilterRequest
     {
-        public int? Gradeid { get; set; }
-        public int? Submissionid { get; set; }
-        public decimal? Q1 { get; set; }
+        public int? Gradeid { get; set; } = 1;
+        public int? Submissionid { get; set; } =1;
+        public decimal? Q1 { get; set; } = 1;
 
-        public decimal? Q2 { get; set; }
+        public decimal? Q2 { get; set; } = 1;
 
-        public decimal? Q3 { get; set; }
+        public decimal? Q3 { get; set; } = (decimal?)0.5;
 
-        public decimal? Q4 { get; set; }
+        public decimal? Q4 { get; set; } = (decimal?)0.5;
 
-        public decimal? Q5 { get; set; }
+        public decimal? Q5 { get; set; } = (decimal?)0.5;
 
-        public decimal? Q6 { get; set; }
-        public decimal? Q7 { get; set; }
-        public decimal? Q8 { get; set; }
-        public decimal? Q9 { get; set; }
-        public decimal? Q10 { get; set; }
-        public decimal? Q11 { get; set; }
-        public decimal? Q12 { get; set; }
+        public decimal? Q6 { get; set; } = 2;
+        public decimal? Q7 { get; set; } = 1;
+        public decimal? Q8 { get; set; } = (decimal?)0.25;
+        public decimal? Q9 { get; set; } = (decimal?)0.25;
+        public decimal? Q10 { get; set; } = (decimal?)1.25;
+        public decimal? Q11 { get; set; } = (decimal?)0.75;
+        public decimal? Q12 { get; set; } = (decimal?)0.5;
 
         public decimal? Totalscore { get; set; }
         public string? Status { get; set; }
@@ -41,6 +42,7 @@ namespace PRN232_GradingSystem_API.Models.RequestModel
     public partial class GradeRequest
     {
         [Required(ErrorMessage = "Submission ID is required.")]
+        [DefaultValue(1)]
         public int? Submissionid { get; set; }
 
         [Range(0, 1, ErrorMessage = "Q1 must be between 0 and 1.")]
@@ -75,7 +77,7 @@ namespace PRN232_GradingSystem_API.Models.RequestModel
         public decimal? Q12 { get; set; }
 
         [Required(ErrorMessage = "Marker is required.")]
-        [Range(0, int.MaxValue, ErrorMessage = "MarkerID must be positive number")]
+        [Range(1, int.MaxValue, ErrorMessage = "MarkerID must be positive number")]
         public int? MarkerId { get; set; }
     }
 
